@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { FaRobot } from "react-icons/fa";
 
 interface LoadingProps {
   onLoadComplete: () => void;
@@ -112,7 +113,8 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
       exit={{ opacity: 0 }}
       transition={{ duration: 0.8 }}
     >
-      <div className="text-center">
+      <div className="text-center flex flex-col items-center gap-8">
+        {/* Thanh tìm kiếm */}
         <motion.div
           className="w-[50em] h-[5em] mb-4 mx-auto border-2 border-black rounded-full overflow-hidden flex items-center relative"
           layoutId="searchBar"
@@ -129,42 +131,64 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
               transition={{ duration: 0.3 }}
             >
               <motion.span>
-                Đang tìm kiếm... {Math.floor(currentProgress)}%
+                ĐANG TẢI ... {Math.floor(currentProgress)}%
               </motion.span>
             </motion.span>
           </motion.div>
 
           {/* Icon tìm kiếm bên phải */}
-          <motion.div
-            className="ml-auto pr-6"
-            layoutId="searchIcon"
-          >
-            <motion.svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-              className="w-8 h-8"
-              initial={{ rotate: 0 }}
-              animate={{
-                rotate: currentProgress === 100 ? 0 : 360,
-                scale: currentProgress === 100 ? 1.2 : 1
-              }}
-              transition={{
-                rotate: {
-                  duration: 2,
-                  repeat: currentProgress === 100 ? 0 : Infinity,
-                  ease: "linear"
-                },
-                scale: {
-                  duration: 0.3
-                }
-              }}
+          {currentProgress === 100 && (
+            <motion.div
+              className="ml-auto pr-6"
+              layoutId="searchIcon"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-            </motion.svg>
-          </motion.div>
+              <motion.svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-8 h-8"
+                initial={{ rotate: 0 }}
+                animate={{
+                  rotate: currentProgress === 100 ? 0 : 360,
+                  scale: currentProgress === 100 ? 1.2 : 1
+                }}
+                transition={{
+                  rotate: {
+                    duration: 2,
+                    repeat: currentProgress === 100 ? 0 : Infinity,
+                    ease: "linear"
+                  },
+                  scale: {
+                    duration: 0.3
+                  }
+                }}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </motion.svg>
+            </motion.div>
+          )}
+        </motion.div>
+
+        {/* Icon AI bên dưới */}
+        <motion.div
+          className="absolute left-32 bottom-32"
+          animate={{
+            x: `calc((100vw - 24rem) * ${currentProgress / 100})`,
+          }}
+          transition={{
+            duration: 0.3,
+            ease: "linear"
+          }}
+        >
+          <FaRobot className="w-32 h-32" />
+          <motion.div
+            className="absolute bottom-0 left-0 w-32 h-1 bg-black"
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+          />
         </motion.div>
       </div>
     </motion.div>
