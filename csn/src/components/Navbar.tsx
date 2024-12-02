@@ -18,8 +18,10 @@ const Navbar = () => {
     const lineRef = useRef(null);
     const line1Ref = useRef(null);
     const line2Ref = useRef(null);
+    const line3Ref = useRef(null);
     const text1Ref = useRef(null);
     const text2Ref = useRef(null);
+    const inputRef = useRef(null);
 
     gsap.registerPlugin(TextPlugin);
 
@@ -53,6 +55,17 @@ const Navbar = () => {
             gsap.fromTo(text2Ref.current,
                 { opacity: 0, x: -70, text: "" },
                 { opacity: 1, x: -300, text: "Mình có thể giúp gì cho bạn?", duration: 0.5, delay: 5.2 }
+            );
+
+            // Animation cho line3 và input
+            gsap.fromTo(line3Ref.current,
+                { width: 0 },
+                { width: '4rem', duration: 0.5, delay: 5.9 }
+            );
+
+            gsap.fromTo(inputRef.current,
+                { opacity: 0, x: -70 },
+                { opacity: 1, x: -300, duration: 0.5, delay: 6.4 }
             );
         }
     }, [isLoading]);
@@ -90,6 +103,18 @@ const Navbar = () => {
                             <div ref={line2Ref} className="w-16 h-0.5 bg-black -translate-x-16"></div>
                             <div ref={text2Ref} className="absolute left-0 -translate-x-20 border-2 border-black bg-white text-black rounded-lg px-5 py-1.5 whitespace-nowrap">
                                 Mình có thể giúp gì cho bạn?
+                            </div>
+                        </div>
+                    </div>
+                    <div className="absolute top-32">
+                        <div className="flex items-center">
+                            <div ref={line3Ref} className="w-16 h-0.5 bg-black -translate-x-16"></div>
+                            <div ref={inputRef} className="absolute left-0 -translate-x-20">
+                                <input
+                                    type="text"
+                                    placeholder="Nhập câu hỏi của bạn..."
+                                    className="border-2 border-black bg-white text-black rounded-lg px-5 py-1.5 w-72 focus:outline-none"
+                                />
                             </div>
                         </div>
                     </div>

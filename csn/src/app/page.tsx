@@ -265,6 +265,7 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
   return (
     <motion.div
       className={`fixed inset-0 bg-white ${beVietnamPro.className}`}
+      style={{ height: '100vh' }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
