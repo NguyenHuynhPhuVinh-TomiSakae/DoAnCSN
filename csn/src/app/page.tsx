@@ -63,6 +63,9 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
   // Thêm state mới để kiểm soát việc chuyển đổi UI
   const [showSearch, setShowSearch] = useState(false);
 
+  // Thêm ref cho input
+  const inputRef = useRef<HTMLInputElement>(null);
+
   // Sửa đổi hàm animateProgress
   const animateProgress = (targetProgress: number) => {
     // Nếu đã hoàn thành, không cho phép giảm tiến trình
@@ -206,6 +209,10 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
                 delay: 0.2,
                 onComplete: () => {
                   setShowTerms(true);
+                  // Focus vào input sau khi animation hoàn tất
+                  setTimeout(() => {
+                    inputRef.current?.focus();
+                  }, 100);
                 }
               });
             }
@@ -353,6 +360,7 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
                       className="search-input-container w-full px-8 flex items-center relative z-20"
                     >
                       <input
+                        ref={inputRef}
                         type="text"
                         value={searchValue}
                         onChange={(e) => setSearchValue(e.target.value)}
