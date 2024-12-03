@@ -294,6 +294,27 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
     };
   }, []);
 
+  // Thêm useEffect để kiểm soát scroll
+  useEffect(() => {
+    if (!showTerms) {
+      // Thêm padding-right để bù đắp cho thanh cuộn
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+      document.body.style.overflow = 'hidden';
+    } else {
+      const allRowsVisible = visibleRows.every(row => row);
+      if (allRowsVisible) {
+        document.body.style.paddingRight = '0px';
+        document.body.style.overflow = 'unset';
+      }
+    }
+
+    return () => {
+      document.body.style.paddingRight = '0px';
+      document.body.style.overflow = 'unset';
+    };
+  }, [showTerms, visibleRows]);
+
   // Sửa đổi phần return để sử dụng motion components
   return (
     <motion.div
@@ -311,7 +332,7 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
               SHOWAI
             </div>
             <div className="showai-description text-xl mb-8 opacity-0 invisible">
-              Khám phá các công cụ <span className={`${beVietnamPro.className} font-bold text-2xl`}>AI</span> hàng đầu
+              Khám phá các công cụ <span className={`${beVietnamPro.className} font-bold text-2xl`}>AI</span> miễn phí
               <div className="text-xl mt-1">sử dụng được tại <span className={`${beVietnamPro.className} font-bold text-2xl`}>Việt Nam</span></div>
             </div>
           </div>

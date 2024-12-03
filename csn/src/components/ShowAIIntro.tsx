@@ -2,8 +2,9 @@
 'use client';
 import { motion } from 'framer-motion';
 import { Be_Vietnam_Pro, Orbitron } from 'next/font/google';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
+import { useInView } from 'framer-motion';
 
 const beVietnamPro = Be_Vietnam_Pro({
     subsets: ['vietnamese'],
@@ -16,6 +17,50 @@ const orbitron = Orbitron({
     weight: ['700'],
     display: 'swap',
 });
+
+// Tạo component con
+function AISection({ tag, tools, index, tagTranslations }: any) {
+    const ref = useRef(null);
+    const isInView = useInView(ref, {
+        once: true,
+        amount: 0.2,
+        margin: "0px 0px -100px 0px"
+    });
+
+    return (
+        <motion.section
+            key={tag}
+            ref={ref}
+            initial={{ height: 0, opacity: 0 }}
+            animate={isInView ? { height: 'auto', opacity: 1 } : { height: 0, opacity: 0 }}
+            transition={{
+                duration: 0.8,
+                height: {
+                    type: "spring",
+                    stiffness: 50,
+                    damping: 15
+                }
+            }}
+            className="mb-16 w-1/2 overflow-hidden"
+        >
+            <h2 className={`text-2xl font-bold mb-6 ${orbitron.className} ${index % 2 === 0 ? '' : 'text-right'}`}>
+                {tagTranslations[tag] || tag}
+            </h2>
+            <div className={`grid grid-cols-1 gap-4 w-48 ${index % 2 === 0 ? '' : 'ml-auto'}`}>
+                {tools.map((tool: any) => (
+                    <div key={tool.id} className="relative aspect-[16/9] overflow-hidden group">
+                        <Image
+                            src={tool.image || '/placeholder.jpg'}
+                            alt={tool.name}
+                            fill
+                            className="object-cover transition-transform group-hover:scale-105"
+                        />
+                    </div>
+                ))}
+            </div>
+        </motion.section>
+    );
+}
 
 export default function ShowAIIntro() {
     const [aiToolsByTag, setAiToolsByTag] = useState<{ [key: string]: any[] }>({});
@@ -30,6 +75,10 @@ export default function ShowAIIntro() {
         'Chat': 'Trò chuyện AI',
         'App': 'Ứng dụng AI',
     };
+
+    // Thêm ref và useInView cho phần mô tả
+    const descriptionRef = useRef(null);
+    const isDescriptionInView = useInView(descriptionRef, { once: true });
 
     useEffect(() => {
         fetch('/api/showai?sort=view')
@@ -68,17 +117,18 @@ export default function ShowAIIntro() {
         >
             <div className="absolute inset-0 bg-black fixed" />
 
-            <div className="relative z-10 py-16">
+            <div className="relative z-10 py-24">
                 <motion.div
-                    className="text-center mb-16 px-4"
-                    initial={{ y: 30, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ duration: 0.8 }}
+                    ref={descriptionRef}
+                    className="text-center mb-24 px-8"
+                    initial={{ y: 50, opacity: 0 }}
+                    animate={isDescriptionInView ? { y: 0, opacity: 1 } : { y: 50, opacity: 0 }}
+                    transition={{ duration: 1, ease: "easeOut" }}
                 >
-                    <h1 className={`${orbitron.className} text-4xl font-bold mb-4`}>
+                    <h1 className={`${orbitron.className} text-6xl font-bold mb-8 tracking-wider`}>
                         Khám Phá Công Nghệ AI
                     </h1>
-                    <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+                    <p className="text-2xl text-gray-200 max-w-4xl mx-auto leading-relaxed font-medium">
                         Tổng hợp những công cụ AI hàng đầu được cộng đồng sử dụng nhiều nhất,
                         giúp bạn nâng cao hiệu suất công việc trong từng lĩnh vực.
                     </p>
@@ -86,29 +136,13 @@ export default function ShowAIIntro() {
 
                 <div className="flex flex-wrap justify-between px-8">
                     {Object.entries(aiToolsByTag).map(([tag, tools], index) => (
-                        <motion.section
+                        <AISection
                             key={tag}
-                            initial={{ y: 30, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.3, duration: 0.8 }}
-                            className="mb-16 w-1/2"
-                        >
-                            <h2 className={`text-2xl font-bold mb-6 ${orbitron.className} ${index % 2 === 0 ? '' : 'text-right'}`}>
-                                {tagTranslations[tag] || tag}
-                            </h2>
-                            <div className={`grid grid-cols-1 gap-4 w-48 ${index % 2 === 0 ? '' : 'ml-auto'}`}>
-                                {tools.map((tool: any) => (
-                                    <div key={tool.id} className="relative aspect-[16/9] overflow-hidden group">
-                                        <Image
-                                            src={tool.image || '/placeholder.jpg'}
-                                            alt={tool.name}
-                                            fill
-                                            className="object-cover transition-transform group-hover:scale-105"
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                        </motion.section>
+                            tag={tag}
+                            tools={tools}
+                            index={index}
+                            tagTranslations={tagTranslations}
+                        />
                     ))}
                 </div>
             </div>
