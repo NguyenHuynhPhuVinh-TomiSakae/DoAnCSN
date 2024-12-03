@@ -278,25 +278,16 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
       scrollTrigger: {
         trigger: '.main-content',
         start: 'top top',
-        end: '+=200%',
-        scrub: 2,
+        end: '+=100%',
         pin: true,
-        toggleActions: 'play none none reverse',
+        scrub: 1,
       }
     });
 
-    tl.fromTo('.showai-intro',
-      {
-        y: '100%',
-        opacity: 1
-      },
-      {
-        y: '0%',
-        opacity: 1,
-        duration: 0.5,
-        ease: "power1.inOut"
-      }
-    );
+    tl.to('.showai-intro', {
+      yPercent: -100,
+      ease: "none"
+    });
 
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
@@ -306,13 +297,12 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
   // Sửa đổi phần return để sử dụng motion components
   return (
     <motion.div
-      className={`min-h-screen bg-white overflow-x-hidden ${beVietnamPro.className}`}
+      className={`min-h-screen bg-white ${beVietnamPro.className}`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Container chính cũng cần overflow-x-hidden */}
-      <div className="relative overflow-x-hidden">
+      <div className="relative">
         {/* Phần loading và animation ban đầu */}
         <div className="main-content h-screen relative">
           {/* Giữ nguyên phần SHOWAI title và description */}
@@ -434,8 +424,8 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
           )}
         </div>
 
-        {/* Phần ShowAIIntro - sử dụng position fixed */}
-        <div className="showai-intro fixed top-0 left-0 w-full h-screen z-10">
+        {/* Điều chỉnh vị trí của ShowAIIntro */}
+        <div className="showai-intro h-screen bg-black">
           <ShowAIIntro />
         </div>
       </div>

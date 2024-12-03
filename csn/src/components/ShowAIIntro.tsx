@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 import { motion } from 'framer-motion';
 import { Be_Vietnam_Pro, Orbitron } from 'next/font/google';
-import { FaRobot } from "react-icons/fa";
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 const beVietnamPro = Be_Vietnam_Pro({
     subsets: ['vietnamese'],
@@ -16,65 +18,99 @@ const orbitron = Orbitron({
 });
 
 export default function ShowAIIntro() {
+    const [aiToolsByTag, setAiToolsByTag] = useState<{ [key: string]: any[] }>({});
+
+    // Thêm object ánh xạ tag sang tiếng Việt
+    const tagTranslations: { [key: string]: string } = {
+        'Video': 'Tạo video',
+        'Code': 'Hỗ trợ lập trình',
+        'Image': 'Tạo hình ảnh',
+        'Web': 'Công cụ Web',
+        'Data': 'Xử lý dữ liệu',
+        'Chat': 'Trò chuyện AI',
+        'App': 'Ứng dụng AI',
+    };
+
+    useEffect(() => {
+        fetch('/api/showai?sort=view')
+            .then(res => res.json())
+            .then(data => {
+                // Đầu tiên nhóm tất cả công cụ theo tag
+                const groupedByTag = data.data.reduce((acc: { [key: string]: any[] }, tool: any) => {
+                    tool.tags?.forEach((tag: string) => {
+                        if (!acc[tag]) {
+                            acc[tag] = [];
+                        }
+                        acc[tag].push(tool);
+                    });
+                    return acc;
+                }, {});
+
+                // Sau đó lấy top 3 của mỗi tag
+                const topThreeByTag = Object.keys(groupedByTag).reduce((acc: { [key: string]: any[] }, tag: string) => {
+                    acc[tag] = groupedByTag[tag]
+                        .sort((a: any, b: any) => b.view - a.view)
+                        .slice(0, 3);
+                    return acc;
+                }, {});
+
+                setAiToolsByTag(topThreeByTag);
+            })
+            .catch(err => console.error('Lỗi khi tải dữ liệu:', err));
+    }, []);
+
     return (
         <motion.div
-            className={`h-screen bg-black text-white ${beVietnamPro.className} relative overflow-hidden`}
+            className={`min-h-full bg-black text-white ${beVietnamPro.className} relative`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
         >
-            {/* Background Gradient */}
-            <div className="absolute inset-0 bg-black" />
+            <div className="absolute inset-0 bg-black fixed" />
 
-            {/* Content Container */}
-            <div className="relative z-10 h-full flex flex-col items-center justify-center px-4">
-                {/* Logo Section */}
+            <div className="relative z-10 py-16">
                 <motion.div
-                    initial={{ y: 50, opacity: 0 }}
+                    className="text-center mb-16 px-4"
+                    initial={{ y: 30, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.3, duration: 0.8 }}
-                    className="flex items-center gap-4 mb-8"
+                    transition={{ duration: 0.8 }}
                 >
-                    <FaRobot className="w-16 h-16 text-white" />
-                    <h1 className={`${orbitron.className} text-6xl md:text-8xl text-white`}>
-                        SHOWAI
+                    <h1 className={`${orbitron.className} text-4xl font-bold mb-4`}>
+                        Khám Phá Công Nghệ AI
                     </h1>
-                </motion.div>
-
-                {/* Description */}
-                <motion.div
-                    initial={{ y: 30, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.6, duration: 0.8 }}
-                    className="text-center max-w-3xl"
-                >
-                    <p className="text-xl md:text-2xl mb-6 text-white">
-                        Khám phá sức mạnh của AI trong tầm tay bạn
-                    </p>
-                    <p className="text-base md:text-lg text-white leading-relaxed">
-                        SHOWAI là nền tảng tổng hợp các công cụ AI hàng đầu, giúp bạn dễ dàng
-                        tiếp cận và sử dụng công nghệ AI trong công việc và cuộc sống hàng ngày.
+                    <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+                        Tổng hợp những công cụ AI hàng đầu được cộng đồng sử dụng nhiều nhất,
+                        giúp bạn nâng cao hiệu suất công việc trong từng lĩnh vực.
                     </p>
                 </motion.div>
 
-                {/* Features */}
-                <motion.div
-                    initial={{ y: 30, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.9, duration: 0.8 }}
-                    className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16"
-                >
-                    {[
-                        { title: 'Đa dạng công cụ', desc: 'Hơn 100+ công cụ AI được tuyển chọn' },
-                        { title: 'Dễ dàng sử dụng', desc: 'Giao diện thân thiện, hướng dẫn chi tiết' },
-                        { title: 'Cập nhật liên tục', desc: 'Luôn cập nhật các công cụ AI mới nhất' },
-                    ].map((feature, index) => (
-                        <div key={index} className="text-center px-4">
-                            <h3 className="text-xl font-semibold mb-2 text-white">{feature.title}</h3>
-                            <p className="text-white">{feature.desc}</p>
-                        </div>
+                <div className="flex flex-wrap justify-between px-8">
+                    {Object.entries(aiToolsByTag).map(([tag, tools], index) => (
+                        <motion.section
+                            key={tag}
+                            initial={{ y: 30, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.3, duration: 0.8 }}
+                            className="mb-16 w-1/2"
+                        >
+                            <h2 className={`text-2xl font-bold mb-6 ${orbitron.className} ${index % 2 === 0 ? '' : 'text-right'}`}>
+                                {tagTranslations[tag] || tag}
+                            </h2>
+                            <div className={`grid grid-cols-1 gap-4 w-48 ${index % 2 === 0 ? '' : 'ml-auto'}`}>
+                                {tools.map((tool: any) => (
+                                    <div key={tool.id} className="relative aspect-[16/9] overflow-hidden group">
+                                        <Image
+                                            src={tool.image || '/placeholder.jpg'}
+                                            alt={tool.name}
+                                            fill
+                                            className="object-cover transition-transform group-hover:scale-105"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </motion.section>
                     ))}
-                </motion.div>
+                </div>
             </div>
         </motion.div>
     );

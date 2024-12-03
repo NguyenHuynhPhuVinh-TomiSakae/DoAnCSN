@@ -131,7 +131,7 @@ const Navbar = () => {
         >
             <div className={`${beVietnamPro.className} font-bold text-xl transition-colors duration-300 ${isDark ? 'text-white' : 'text-black'
                 }`}>
-                {isIntroView ? 'GIỚI THIỆU' : 'TRANG CHỦ'}
+                {isIntroView ? 'PHÂN LOẠI' : 'TRANG CHỦ'}
             </div>
 
             {isIntroView && (
@@ -211,7 +211,7 @@ const Navbar = () => {
                                     ? 'border-white text-white bg-black'
                                     : 'border-black text-black bg-white'
                                     } rounded-lg px-5 py-1.5 whitespace-nowrap`}>
-                                    Giới thiệu
+                                    PHÂN LOẠI
                                 </div>
                             </div>
                         </div>
