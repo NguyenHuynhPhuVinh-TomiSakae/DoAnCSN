@@ -166,9 +166,9 @@ const Navbar = () => {
             </div>
 
             {isIntroView && (
-                <div className="flex-1 max-w-md mx-auto flex justify-center">
+                <div className="fixed left-1/2 -translate-x-1/2" style={{ top: '4px', zIndex: 60 }}>
                     <motion.div
-                        className={`h-[3.5em] mx-auto border-2 overflow-hidden flex items-center relative transition-colors duration-300 ${isInAIRanking
+                        className={`h-[3.5em] border-2 overflow-hidden flex items-center transition-colors duration-300 ${isInAIRanking
                             ? 'border-black bg-white'
                             : 'border-white bg-black'
                             }`}
