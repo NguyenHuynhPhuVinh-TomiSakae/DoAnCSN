@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { useInView } from 'framer-motion';
 import anime from 'animejs';
 import { SelectedToolDetail } from './SelectedToolDetail';
+import AIRanking from './AIRanking';
 
 const beVietnamPro = Be_Vietnam_Pro({
     subsets: ['vietnamese'],
@@ -423,10 +424,11 @@ export default function ShowAIIntro() {
                             allTools={allToolsByTag[tag] || []}
                             onToolClick={setSelectedTool}
                             selectedTool={selectedTool}
-                            isVisible={!selectedTool} // Chỉ hiện khi không có tool nào được chọn
+                            isVisible={!selectedTool}
                         />
                     ))}
                 </div>
+                <AIRanking />
             </div>
         </motion.div>
     );

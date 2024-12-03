@@ -26,6 +26,7 @@ const Navbar = () => {
     const [isIntroView, setIsIntroView] = useState(false);
     const [shouldAnimate, setShouldAnimate] = useState(true);
     const [isInShowAIIntro, setIsInShowAIIntro] = useState(false);
+    const [isInAIRanking, setIsInAIRanking] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -59,6 +60,19 @@ const Navbar = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    useEffect(() => {
+        const handleScroll = () => {
+            const aiRankingElement = document.querySelector('#ai-ranking');
+            if (aiRankingElement) {
+                const rect = aiRankingElement.getBoundingClientRect();
+                setIsInAIRanking(rect.top <= 0 && rect.bottom >= 0);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
     gsap.registerPlugin(TextPlugin);
 
     useEffect(() => {
@@ -66,7 +80,7 @@ const Navbar = () => {
             gsap.fromTo(lineRef.current,
                 { height: 0 },
                 {
-                    height: isIntroView ? '4rem' : '8rem',
+                    height: isIntroView ? '0' : '8rem',
                     duration: 1,
                     ease: "power2.out"
                 }
@@ -76,39 +90,48 @@ const Navbar = () => {
 
     useEffect(() => {
         if (!isLoading && shouldAnimate) {
+            const elements = [line1Ref.current, line2Ref.current, line3Ref.current];
+            if (elements.some(el => !el)) return;
+
             gsap.set([line1Ref.current, line2Ref.current, line3Ref.current], {
                 width: 0
             });
 
-            gsap.fromTo(line1Ref.current,
-                { width: 0 },
-                { width: '4rem', duration: 0.5, delay: 1.5, ease: "power2.out" }
-            );
+            if (line1Ref.current && text1Ref.current) {
+                gsap.fromTo(line1Ref.current,
+                    { width: 0 },
+                    { width: '4rem', duration: 0.5, delay: 1.5, ease: "power2.out" }
+                );
 
-            gsap.fromTo(text1Ref.current,
-                { opacity: 0, x: -50, text: "" },
-                { opacity: 1, x: -150, text: isIntroView ? "Phân tích" : "Xin chào!", duration: 0.5, delay: 2 }
-            );
+                gsap.fromTo(text1Ref.current,
+                    { opacity: 0, x: -50, text: "" },
+                    { opacity: 1, x: -150, text: isIntroView ? "Phân tích" : "Xin chào!", duration: 0.5, delay: 2 }
+                );
+            }
 
-            gsap.fromTo(line2Ref.current,
-                { width: 0 },
-                { width: '4rem', duration: 0.5, delay: 2.7 }
-            );
+            if (line2Ref.current && text2Ref.current) {
+                gsap.fromTo(line2Ref.current,
+                    { width: 0 },
+                    { width: '4rem', duration: 0.5, delay: 2.7 }
+                );
 
-            gsap.fromTo(text2Ref.current,
-                { opacity: 0, x: -70, text: "" },
-                { opacity: 1, x: -300, text: "Mình có thể giúp gì cho bạn?", duration: 0.5, delay: 3.2 }
-            );
+                gsap.fromTo(text2Ref.current,
+                    { opacity: 0, x: -70, text: "" },
+                    { opacity: 1, x: -300, text: "Mình có thể giúp gì cho bạn?", duration: 0.5, delay: 3.2 }
+                );
+            }
 
-            gsap.fromTo(line3Ref.current,
-                { width: 0 },
-                { width: '4rem', duration: 0.5, delay: 3.9 }
-            );
+            if (line3Ref.current && inputRef.current) {
+                gsap.fromTo(line3Ref.current,
+                    { width: 0 },
+                    { width: '4rem', duration: 0.5, delay: 3.9 }
+                );
 
-            gsap.fromTo(inputRef.current,
-                { opacity: 0, x: -70 },
-                { opacity: 1, x: -300, duration: 0.5, delay: 4.4 }
-            );
+                gsap.fromTo(inputRef.current,
+                    { opacity: 0, x: -70 },
+                    { opacity: 1, x: -300, duration: 0.5, delay: 4.4 }
+                );
+            }
 
             setShouldAnimate(false);
         }
@@ -116,7 +139,11 @@ const Navbar = () => {
 
     return (
         <motion.nav
-            className={`fixed top-0 left-0 right-0 h-16 z-50 flex justify-between items-center px-8 transition-colors duration-300 ${isDark || isInShowAIIntro ? 'bg-black' : 'bg-white'
+            className={`fixed top-0 left-0 right-0 h-16 z-50 flex justify-between items-center px-8 transition-colors duration-300 ${isDark || isInShowAIIntro
+                ? isInAIRanking
+                    ? 'bg-white'
+                    : 'bg-black'
+                : 'bg-white'
                 }`}
             initial={{ opacity: 0, y: -20 }}
             animate={{
@@ -129,22 +156,32 @@ const Navbar = () => {
                 delay: isLoading ? 0 : 2
             }}
         >
-            <div className={`${beVietnamPro.className} font-bold text-xl transition-colors duration-300 ${isDark ? 'text-white' : 'text-black'
+            <div className={`${beVietnamPro.className} font-bold text-xl transition-colors duration-300 ${isDark || isInShowAIIntro
+                ? isInAIRanking
+                    ? 'text-black'
+                    : 'text-white'
+                : 'text-black'
                 }`}>
-                {isIntroView ? 'PHÂN LOẠI' : 'TRANG CHỦ'}
+                {isInAIRanking ? 'XẾP HẠNG' : isIntroView ? 'PHÂN LOẠI' : 'TRANG CHỦ'}
             </div>
 
             {isIntroView && (
                 <div className="flex-1 max-w-md mx-auto flex justify-center">
                     <motion.div
-                        className="h-[3.5em] mx-auto border-2 border-white rounded-full overflow-hidden flex items-center relative bg-black"
+                        className={`h-[3.5em] mx-auto border-2 overflow-hidden flex items-center relative transition-colors duration-300 ${isInAIRanking
+                            ? 'border-black bg-white'
+                            : 'border-white bg-black'
+                            }`}
                         initial={{ width: '5em' }}
                         animate={{ width: '35em' }}
                         transition={{ duration: 1, ease: "easeOut" }}
                     >
                         <input
                             type="text"
-                            className="w-full bg-black text-white placeholder-gray-400 px-4 py-1 focus:outline-none text-sm"
+                            className={`w-full px-4 py-1 focus:outline-none text-sm transition-colors duration-300 ${isInAIRanking
+                                ? 'bg-white text-black placeholder-gray-600'
+                                : 'bg-black text-white placeholder-gray-400'
+                                }`}
                         />
                         <div className="search-icon ml-auto pr-4">
                             <svg
@@ -153,7 +190,8 @@ const Navbar = () => {
                                 viewBox="0 0 24 24"
                                 strokeWidth={2}
                                 stroke="currentColor"
-                                className="w-6 h-6 text-white"
+                                className={`w-6 h-6 transition-colors duration-300 ${isInAIRanking ? 'text-black' : 'text-white'
+                                    }`}
                             >
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                             </svg>
@@ -163,16 +201,33 @@ const Navbar = () => {
             )}
 
             <div className="flex items-center relative">
-                <FaRobot className={`w-8 h-8 transition-colors duration-300 ${isDark ? 'text-white' : 'text-black'}`} />
-                <div ref={lineRef} className={`absolute top-full left-1/2 transform -translate-x-1/2 w-0.5 transition-colors duration-300 ${isDark ? 'bg-white' : 'bg-black'
+                <FaRobot className={`w-8 h-8 transition-colors duration-300 ${isDark || isInShowAIIntro
+                    ? isInAIRanking
+                        ? 'text-black'
+                        : 'text-white'
+                    : 'text-black'
+                    }`} />
+                <div ref={lineRef} className={`absolute top-full left-1/2 transform -translate-x-1/2 w-0.5 transition-colors duration-300 ${isDark || isInShowAIIntro
+                    ? isInAIRanking
+                        ? 'bg-black'
+                        : 'bg-white'
+                    : 'bg-black'
                     }`}>
-                    {!isIntroView ? (
+                    {!isIntroView && (
                         <>
                             <div className="absolute top-8">
                                 <div className="flex items-center">
-                                    <div ref={line1Ref} className={`w-16 h-0.5 -translate-x-16 transition-colors duration-300 ${isDark ? 'bg-white' : 'bg-black'
+                                    <div ref={line1Ref} className={`w-16 h-0.5 -translate-x-16 transition-colors duration-300 ${isDark || isInShowAIIntro
+                                        ? isInAIRanking
+                                            ? 'bg-black'
+                                            : 'bg-white'
+                                        : 'bg-black'
                                         }`}></div>
-                                    <div ref={text1Ref} className={`absolute left-0 -translate-x-20 border-2 transition-colors duration-300 ${isDark ? 'border-white text-white bg-black' : 'border-black text-black bg-white'
+                                    <div ref={text1Ref} className={`absolute left-0 -translate-x-20 border-2 transition-colors duration-300 ${isDark || isInShowAIIntro
+                                        ? isInAIRanking
+                                            ? 'border-black text-black bg-white'
+                                            : 'border-white text-white bg-black'
+                                        : 'border-black text-black bg-white'
                                         } rounded-lg px-5 py-1.5 whitespace-nowrap`}>
                                         {isIntroView ? "Phân tích" : "Xin chào!"}
                                     </div>
@@ -180,9 +235,17 @@ const Navbar = () => {
                             </div>
                             <div className="absolute top-20">
                                 <div className="flex items-center">
-                                    <div ref={line2Ref} className={`w-16 h-0.5 -translate-x-16 transition-colors duration-300 ${isDark ? 'bg-white' : 'bg-black'
+                                    <div ref={line2Ref} className={`w-16 h-0.5 -translate-x-16 transition-colors duration-300 ${isDark || isInShowAIIntro
+                                        ? isInAIRanking
+                                            ? 'bg-black'
+                                            : 'bg-white'
+                                        : 'bg-black'
                                         }`}></div>
-                                    <div ref={text2Ref} className={`absolute left-0 -translate-x-20 border-2 transition-colors duration-300 ${isDark ? 'border-white text-white bg-black' : 'border-black text-black bg-white'
+                                    <div ref={text2Ref} className={`absolute left-0 -translate-x-20 border-2 transition-colors duration-300 ${isDark || isInShowAIIntro
+                                        ? isInAIRanking
+                                            ? 'border-black text-black bg-white'
+                                            : 'border-white text-white bg-black'
+                                        : 'border-black text-black bg-white'
                                         } rounded-lg px-5 py-1.5 whitespace-nowrap`}>
                                         Mình có thể giúp gì cho bạn?
                                     </div>
@@ -190,31 +253,27 @@ const Navbar = () => {
                             </div>
                             <div className="absolute top-32">
                                 <div className="flex items-center">
-                                    <div ref={line3Ref} className={`w-16 h-0.5 -translate-x-16 transition-colors duration-300 ${isDark ? 'bg-white' : 'bg-black'
+                                    <div ref={line3Ref} className={`w-16 h-0.5 -translate-x-16 transition-colors duration-300 ${isDark || isInShowAIIntro
+                                        ? isInAIRanking
+                                            ? 'bg-black'
+                                            : 'bg-white'
+                                        : 'bg-black'
                                         }`}></div>
                                     <div ref={inputRef} className="absolute left-0 -translate-x-20">
                                         <input
                                             type="text"
                                             placeholder="Nhập câu hỏi của bạn..."
-                                            className={`border-2 transition-colors duration-300 ${isDark ? 'border-white text-white bg-black placeholder-gray-400' : 'border-black text-black bg-white placeholder-gray-600'
+                                            className={`border-2 transition-colors duration-300 ${isDark || isInShowAIIntro
+                                                ? isInAIRanking
+                                                    ? 'border-black text-black bg-white placeholder-gray-600'
+                                                    : 'border-white text-white bg-black placeholder-gray-400'
+                                                : 'border-black text-black bg-white placeholder-gray-600'
                                                 } rounded-lg px-5 py-1.5 w-72 focus:outline-none`}
                                         />
                                     </div>
                                 </div>
                             </div>
                         </>
-                    ) : (
-                        <div className="absolute top-8">
-                            <div className="flex items-center">
-                                <div ref={line1Ref} className={`w-16 h-0.5 -translate-x-16 transition-colors duration-300 ${isDark ? 'bg-white' : 'bg-black'}`}></div>
-                                <div ref={text1Ref} className={`absolute left-0 -translate-x-20 border-2 transition-colors duration-300 ${isDark
-                                    ? 'border-white text-white bg-black'
-                                    : 'border-black text-black bg-white'
-                                    } rounded-lg px-5 py-1.5 whitespace-nowrap`}>
-                                    PHÂN LOẠI
-                                </div>
-                            </div>
-                        </div>
                     )}
                 </div>
             </div>
