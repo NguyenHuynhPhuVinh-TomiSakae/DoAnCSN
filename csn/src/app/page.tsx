@@ -4,11 +4,13 @@ import dynamic from 'next/dynamic';
 import { useEffect, useState, useRef } from 'react';
 import { FaRobot } from "react-icons/fa";
 import gsap from 'gsap';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import anime from 'animejs';
 import { Be_Vietnam_Pro, Orbitron } from 'next/font/google'
 import { useLoading } from '@/context/LoadingContext';
 import Marquee from 'react-fast-marquee';
+import ShowAIIntro from '@/components/ShowAIIntro';
+import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 
 interface LoadingProps {
   onLoadComplete: () => void;
@@ -29,14 +31,15 @@ const orbitron = Orbitron({
 // Cập nhật mảng searchTerms với các từ khóa thân thiện với người dùng hơn
 const searchTerms = [
   // Dòng 1 - Chạy từ phải sang trái
-  ["Tạo ảnh AI", "Chỉnh sửa ảnh", "Xóa phông nền", "Phục hồi ảnh cũ", "Tạo avatar", "Chuyển ảnh hoạt hình", "Tạo ảnh AI", "Chỉnh sửa ảnh", "Xóa phông nền", "Phục hồi ảnh cũ", "Tạo avatar", "Chuyển ảnh hoạt hình", "Tạo ảnh AI", "Chỉnh sửa ảnh", "Xóa phông nền", "Phục hồi ảnh cũ", "Tạo avatar", "Chuyển ảnh hoạt hình"],
-  // Dòng 2 - Chạy từ trái sang phải
-  ["Tạo video AI", "Lồng tiếng video", "Chuyển giọng nói", "Tạo nhạc AI", "Chỉnh sửa video", "Tạo video từ ảnh", "Tạo video AI", "Lồng tiếng video", "Chuyển giọng nói", "Tạo nhạc AI", "Chỉnh sửa video", "Tạo video từ ảnh", "Tạo video AI", "Lồng tiếng video", "Chuyển giọng nói", "Tạo nhạc AI", "Chỉnh sửa video", "Tạo video từ ảnh"],
+  ["Tạo ảnh AI", "Chỉnh sửa ảnh", "Xóa phông nền", "Tạo ảnh AI", "Chỉnh sửa ảnh", "Xóa phng nền", "Tạo ảnh AI", "Chỉnh sửa ảnh", "Xóa phông nền"],
+  // Dòng 2 - Chạy từ trái sang phải  
+  ["Tạo video AI", "Lồng tiếng video", "Chuyển giọng nói", "Tạo video AI", "Lồng tiếng video", "Chuyển giọng nói", "Tạo video AI", "Lồng tiếng video", "Chuyển giọng nói"],
   // Dòng 3 - Chạy từ phải sang trái
-  ["Chat với AI", "Viết content", "Dịch văn bản", "Phân tích dữ liệu", "Tạo mã nguồn", "Hỗ trợ học tập", "Chat với AI", "Viết content", "Dịch văn bản", "Phân tích dữ liệu", "Tạo mã nguồn", "Hỗ trợ học tập", "Chat với AI", "Viết content", "Dịch văn bản", "Phân tích dữ liệu", "Tạo mã nguồn", "Hỗ trợ học tập"],
-  // Dòng 4 - Chạy từ trái sang phải
-  ["Tạo 3D AI", "Thiết kế logo", "Tạo hình nền", "Chỉnh màu ảnh", "Ghép ảnh AI", "Tạo ảnh 3D", "Tạo 3D AI", "Thiết kế logo", "Tạo hình nền", "Chỉnh màu ảnh", "Ghép ảnh AI", "Tạo ảnh 3D", "Tạo 3D AI", "Thiết kế logo", "Tạo hình nền", "Chỉnh màu ảnh", "Ghép ảnh AI", "Tạo ảnh 3D"]
+  ["Chat với AI", "Viết content", "Dịch văn bản", "Chat với AI", "Viết content", "Dịch văn bản", "Chat với AI", "Viết content", "Dịch văn bản"]
 ];
+
+// Đăng ký plugin ScrollTrigger
+gsap.registerPlugin(ScrollTrigger);
 
 // Tạo component với SSR disabled
 const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps) => {
@@ -53,6 +56,12 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
 
   // Thêm state mới để quản lý việc hiển thị từng hàng
   const [visibleRows, setVisibleRows] = useState<boolean[]>([false, false, false, false]);
+
+  // Thêm state mới để quản lý input
+  const [searchValue, setSearchValue] = useState('');
+
+  // Thêm state mới để kiểm soát việc chuyển đổi UI
+  const [showSearch, setShowSearch] = useState(false);
 
   // Sửa đổi hàm animateProgress
   const animateProgress = (targetProgress: number) => {
@@ -182,7 +191,6 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
             duration: 0.8,
             ease: 'power2.in',
             onComplete: () => {
-              // Thay đổi display để xóa hoàn toàn icon AI
               gsap.set('.ai-icon', { display: 'none' });
 
               gsap.set(['.showai-text', '.showai-description'], { visibility: 'visible', opacity: 1 });
@@ -197,7 +205,7 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
                 ease: 'power2.out',
                 delay: 0.2,
                 onComplete: () => {
-                  setShowTerms(true); // Hiển thị terms sau khi SHOWAI hoàn tất
+                  setShowTerms(true);
                 }
               });
             }
@@ -207,18 +215,15 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
 
       tl.to({}, { duration: 0.6 })
         .to('.loading-text', {
-          opacity: 0,
           duration: 0.8,
-          ease: 'power2.out'
+          ease: 'power2.inOut',
+          onComplete: () => {
+            setShowSearch(true);
+          }
         })
-        .to('.progress-inner', {
-          opacity: 0,
-          duration: 0.5,
-          ease: 'power2.out'
-        }, '<')
         .to('.search-icon', {
           opacity: 1,
-          duration: 0.5,
+          duration: 0.8,
           ease: 'power2.inOut'
         }, '-=0.8');
     }
@@ -261,102 +266,170 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
     }
   }, [showTerms]);
 
+  useEffect(() => {
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '.main-content',
+        start: 'top top',
+        end: '+=200%',
+        scrub: 2,
+        pin: true,
+        toggleActions: 'play none none reverse',
+      }
+    });
+
+    tl.fromTo('.showai-intro',
+      {
+        y: '100%',
+        opacity: 1
+      },
+      {
+        y: '0%',
+        opacity: 1,
+        duration: 0.5,
+        ease: "power1.inOut"
+      }
+    );
+
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, []);
+
   // Sửa đổi phần return để sử dụng motion components
   return (
     <motion.div
-      className={`fixed inset-0 bg-white ${beVietnamPro.className}`}
-      style={{ height: '100vh' }}
+      className={`min-h-screen bg-white overflow-x-hidden ${beVietnamPro.className}`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="h-full relative">
-        <div className="absolute top-[10%] left-1/2 -translate-x-1/2 text-center">
-          <div className={`showai-text text-9xl font-bold mb-4 opacity-0 invisible ${orbitron.className} tracking-wider`}>
-            SHOWAI
-          </div>
-          <div className="showai-description text-xl mb-8 opacity-0 invisible">
-            Khám phá các công cụ <span className={`${beVietnamPro.className} font-bold text-2xl`}>AI</span> hàng đầu
-          </div>
-        </div>
-
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          <motion.div
-            ref={progressBarRef}
-            className="progress-bar h-[5em] mx-auto border-2 border-black rounded-full overflow-hidden flex items-center relative"
-            initial={{ width: '5em' }}
-            animate={{ width: '50em' }}
-            transition={{ duration: 1, ease: "easeOut" }}
-          >
-            <div className="progress-inner absolute inset-0 flex items-center justify-center">
-              <span className="loading-text relative z-10 font-medium text-3xl">
-                ĐANG TẢI ... {Math.floor(currentProgress)}%
-              </span>
+      {/* Container chính cũng cần overflow-x-hidden */}
+      <div className="relative overflow-x-hidden">
+        {/* Phần loading và animation ban đầu */}
+        <div className="main-content h-screen relative">
+          {/* Giữ nguyên phần SHOWAI title và description */}
+          <div className="absolute top-[10%] left-1/2 -translate-x-1/2 text-center">
+            <div className={`showai-text text-9xl font-bold mb-4 opacity-0 invisible ${orbitron.className} tracking-wider`}>
+              SHOWAI
             </div>
-
-            {currentProgress === 100 && (
-              <div className="search-icon ml-auto pr-6">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-8 h-8"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                </svg>
-              </div>
-            )}
-          </motion.div>
-        </div>
-
-        <motion.div
-          className="ai-icon absolute bottom-32"
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 1, ease: "easeOut" }}
-        >
-          <FaRobot className="w-32 h-32" />
-          <div className="w-32 h-1 bg-black" />
-        </motion.div>
-
-        <div className="ai-icon-target absolute right-32 bottom-32">
-          <FaRobot className="opacity-0 w-32 h-32" />
-          <div className="w-32 opacity-0 h-1 bg-black" />
-        </div>
-
-        {showTerms && (
-          <div className="absolute top-[60%] left-0 right-0 flex flex-col gap-2">
-            {searchTerms.map((row, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{
-                  opacity: visibleRows[index] ? 1 : 0,
-                  y: visibleRows[index] ? 0 : 20
-                }}
-                transition={{ duration: 0.5 }}
-              >
-                <Marquee
-                  speed={50}
-                  gradient={false}
-                  direction={index % 2 === 0 ? "left" : "right"}
-                  className="mb-2"
-                >
-                  {row.map((term, termIndex) => (
-                    <div
-                      key={termIndex}
-                      className="px-3 py-1.5 mx-1 border-2 border-black bg-white text-black rounded-lg font-medium"
-                    >
-                      {term}
-                    </div>
-                  ))}
-                </Marquee>
-              </motion.div>
-            ))}
+            <div className="showai-description text-xl mb-8 opacity-0 invisible">
+              Khám phá các công cụ <span className={`${beVietnamPro.className} font-bold text-2xl`}>AI</span> hàng đầu
+              <div className="text-xl mt-1">sử dụng được tại <span className={`${beVietnamPro.className} font-bold text-2xl`}>Việt Nam</span></div>
+            </div>
           </div>
-        )}
+
+          {/* Giữ nguyên phần progress bar */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <motion.div
+              ref={progressBarRef}
+              className="progress-bar h-[5em] mx-auto border-2 border-black rounded-full overflow-hidden flex items-center relative"
+              initial={{ width: '5em' }}
+              animate={{ width: '50em' }}
+              transition={{ duration: 1, ease: "easeOut" }}
+            >
+              <div className="progress-inner absolute inset-0 flex items-center justify-center">
+                <AnimatePresence mode="wait">
+                  {!showSearch ? (
+                    <motion.span
+                      key="loading"
+                      initial={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.8, ease: "easeInOut" }}
+                      className="loading-text relative z-20 font-medium text-3xl"
+                    >
+                      ĐANG TẢI ... {Math.floor(currentProgress)}%
+                    </motion.span>
+                  ) : (
+                    <motion.div
+                      key="search"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.8,
+                        ease: "easeOut",
+                        opacity: { duration: 1.2 }
+                      }}
+                      className="search-input-container w-full px-8 flex items-center relative z-20"
+                    >
+                      <input
+                        type="text"
+                        value={searchValue}
+                        onChange={(e) => setSearchValue(e.target.value)}
+                        placeholder="Tìm kiếm công cụ AI..."
+                        className="w-full bg-transparent text-3xl font-medium outline-none placeholder:text-gray-400"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {currentProgress === 100 && (
+                <div className="search-icon ml-auto pr-6 relative z-20">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                    className="w-8 h-8"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                  </svg>
+                </div>
+              )}
+            </motion.div>
+          </div>
+
+          {/* Giữ nguyên phần AI icon và target */}
+          <motion.div className="ai-icon absolute bottom-32">
+            <FaRobot className="w-32 h-32" />
+            <div className="w-32 h-1 bg-black" />
+          </motion.div>
+
+          <div className="ai-icon-target absolute right-32 bottom-32">
+            <FaRobot className="opacity-0 w-32 h-32" />
+            <div className="w-32 opacity-0 h-1 bg-black" />
+          </div>
+
+          {/* Phần search terms */}
+          {showTerms && (
+            <div className="absolute top-[60%] left-0 right-0 flex flex-col gap-2">
+              {searchTerms.map((row, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{
+                    opacity: visibleRows[index] ? 1 : 0,
+                    y: visibleRows[index] ? 0 : 20
+                  }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <Marquee
+                    speed={50}
+                    gradient={false}
+                    direction={index % 2 === 0 ? "left" : "right"}
+                    className="mb-2"
+                  >
+                    {row.map((term, termIndex) => (
+                      <div
+                        key={termIndex}
+                        className="px-6 py-3 mx-2 border-2 border-black bg-white text-black rounded-lg font-medium text-xl"
+                      >
+                        {term}
+                      </div>
+                    ))}
+                  </Marquee>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Phần ShowAIIntro - sử dụng position fixed */}
+        <div className="showai-intro fixed top-0 left-0 w-full h-screen z-10">
+          <ShowAIIntro />
+        </div>
       </div>
     </motion.div>
   );
