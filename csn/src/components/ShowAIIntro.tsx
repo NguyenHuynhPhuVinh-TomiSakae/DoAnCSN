@@ -42,32 +42,38 @@ function AISection({ tag, index, tagTranslations, allTools, onToolClick, selecte
 
     // Sử dụng state để lưu trữ currentPage và currentTools cho từng tag
     const [currentPage, setCurrentPage] = useState(0);
-    const [currentTools, setCurrentTools] = useState(allTools.slice(0, 3));
+    const [currentTools, setCurrentTools] = useState(() => {
+        // Đảo ngược thứ tự hiển thị nếu là bên phải
+        return index % 2 === 0 ? allTools.slice(0, 3) : [...allTools].slice(0, 3).reverse();
+    });
 
     const handleNextTools = () => {
         const nextPage = currentPage + 1;
         const startIndex = nextPage * 3;
-        const nextTools = allTools.slice(startIndex, startIndex + 3);
+        let nextTools = allTools.slice(startIndex, startIndex + 3);
 
         if (nextTools.length === 0) {
-            setCurrentTools(allTools.slice(0, 3));
+            nextTools = allTools.slice(0, 3);
             setCurrentPage(0);
-        } else {
-            setCurrentTools(nextTools);
-            setCurrentPage(nextPage);
         }
+
+        // Đảo ngược thứ tự hiển thị nếu là bên phải
+        setCurrentTools(index % 2 === 0 ? nextTools : [...nextTools].reverse());
+        setCurrentPage(nextPage);
     };
 
     const handlePrevTools = () => {
         if (currentPage > 0) {
             const prevPage = currentPage - 1;
             const startIndex = prevPage * 3;
-            setCurrentTools(allTools.slice(startIndex, startIndex + 3));
+            const prevTools = allTools.slice(startIndex, startIndex + 3);
+            setCurrentTools(index % 2 === 0 ? prevTools : [...prevTools].reverse());
             setCurrentPage(prevPage);
         } else {
             const lastPage = Math.floor((allTools.length - 1) / 3);
             const startIndex = lastPage * 3;
-            setCurrentTools(allTools.slice(startIndex, startIndex + 3));
+            const lastTools = allTools.slice(startIndex, startIndex + 3);
+            setCurrentTools(index % 2 === 0 ? lastTools : [...lastTools].reverse());
             setCurrentPage(lastPage);
         }
     };
@@ -332,17 +338,21 @@ export default function ShowAIIntro() {
                     return acc;
                 }, {});
 
-                // Lưu tất cả công cụ đã được sắp xếp
+                // Sắp xếp công cụ theo view (luôn từ cao đến thấp)
                 const sortedByTag = Object.keys(groupedByTag).reduce((acc: { [key: string]: any[] }, tag: string) => {
-                    acc[tag] = groupedByTag[tag].sort((a: any, b: any) => b.view - a.view);
+                    // Sắp xếp tất cả theo view từ cao đến thấp
+                    const sortedTools = groupedByTag[tag].sort((a: any, b: any) => b.view - a.view);
+                    acc[tag] = sortedTools;
                     return acc;
                 }, {});
 
                 setAllToolsByTag(sortedByTag);
 
-                // Chỉ hiển thị 3 công cụ đầu tiên
-                const topThreeByTag = Object.keys(groupedByTag).reduce((acc: { [key: string]: any[] }, tag: string) => {
-                    acc[tag] = sortedByTag[tag].slice(0, 3);
+                // Chỉ hiển thị 3 công cụ đầu tiên cho mỗi tag
+                const topThreeByTag = Object.keys(sortedByTag).reduce((acc: { [key: string]: any[] }, tag: string, index: number) => {
+                    const tools = sortedByTag[tag].slice(0, 3);
+                    // Nếu là tag ở vị trí lẻ (bên phải), đảo ngược thứ tự hiển thị
+                    acc[tag] = index % 2 === 0 ? tools : [...tools].reverse();
                     return acc;
                 }, {});
 
@@ -428,7 +438,7 @@ export default function ShowAIIntro() {
                         />
                     ))}
                 </div>
-                <AIRanking />
+                {!selectedTool && <AIRanking />}
             </div>
         </motion.div>
     );
