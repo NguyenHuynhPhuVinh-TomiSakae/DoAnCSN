@@ -36,6 +36,8 @@ export default function SearchPage() {
     const router = useRouter();
 
     useEffect(() => {
+        window.scrollTo(0, 0);
+
         const fetchSearchResults = async () => {
             if (!query) return;
 

@@ -36,6 +36,8 @@ const Navbar = () => {
     const router = useRouter();
     const [hoverText, setHoverText] = useState(false);
     const [hasScrolled, setHasScrolled] = useState(false);
+    const [searchValue, setSearchValue] = useState('');
+    const searchInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -244,6 +246,18 @@ const Navbar = () => {
         };
     }, [pathname]);
 
+    const handleSearch = () => {
+        if (searchValue.trim()) {
+            router.push(`/search?q=${encodeURIComponent(searchValue.trim())}`);
+        }
+    };
+
+    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
+
     return (
         <motion.nav
             className={`fixed top-0 left-0 right-0 h-16 z-50 flex justify-between items-center px-8 transition-colors duration-300 ${isInNewAITools
@@ -432,15 +446,23 @@ const Navbar = () => {
                         transition={{ duration: 1, ease: "easeOut" }}
                     >
                         <input
+                            ref={searchInputRef}
                             type="text"
+                            value={searchValue}
+                            onChange={(e) => setSearchValue(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            placeholder="Nhập từ khóa tìm kiếm..."
                             className={`w-full px-4 py-1 focus:outline-none text-sm transition-colors duration-300 ${isInNewAITools
-                                ? 'bg-black text-white placeholder-gray-400'
+                                ? 'bg-black text-white placeholder-text-white'
                                 : isInAIRanking
-                                    ? 'bg-white text-black placeholder-gray-600'
-                                    : 'bg-black text-white placeholder-gray-400'
+                                    ? 'bg-white text-black placeholder-text-black'
+                                    : 'bg-black text-white placeholder-text-white'
                                 }`}
                         />
-                        <div className="search-icon ml-auto pr-4">
+                        <div
+                            className="search-icon ml-auto pr-4 cursor-pointer"
+                            onClick={handleSearch}
+                        >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 fill="none"
@@ -529,9 +551,9 @@ const Navbar = () => {
                                                 placeholder="Nhập câu hỏi của bạn..."
                                                 className={`border-2 transition-colors duration-300 ${isDark || isInShowAIIntro
                                                     ? isInAIRanking
-                                                        ? 'border-black text-black bg-white placeholder-gray-600'
-                                                        : 'border-white text-white bg-black placeholder-gray-400'
-                                                    : 'border-black text-black bg-white placeholder-gray-600'
+                                                        ? 'border-black text-black bg-white placeholder-text-black'
+                                                        : 'border-white text-white bg-black placeholder-text-white'
+                                                    : 'border-black text-black bg-white placeholder-text-black'
                                                     } rounded-lg px-5 py-1.5 w-72 focus:outline-none`}
                                             />
                                         </div>
