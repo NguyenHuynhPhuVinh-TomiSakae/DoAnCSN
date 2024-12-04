@@ -206,7 +206,18 @@ export async function GET(request: Request) {
         }
 
         if (searchKeyword) {
-            // Lấy documents match với regex
+            // Tạo cache key cho tìm kiếm
+            const searchCacheKey = `search:${searchKeyword}`;
+
+            // Kiểm tra cache trước
+            const cachedSearchResult = await redis.getBuffer(searchCacheKey);
+            if (cachedSearchResult) {
+                const uncompressedData = await ungzipAsync(cachedSearchResult);
+                const searchData = JSON.parse(uncompressedData.toString());
+                return createCorsResponse(searchData);
+            }
+
+            // Nếu không có trong cache, thực hiện tìm kiếm
             const regexDocs = await collection.find({
                 $or: [
                     { name: { $regex: searchKeyword, $options: 'i' } },
@@ -215,7 +226,6 @@ export async function GET(request: Request) {
                 ]
             }).toArray();
 
-            // Lấy documents match với keywords
             const allDocs = await collection.find().toArray();
             const keywordDocs = allDocs.filter(doc =>
                 doc.keywords?.some((keyword: string) =>
@@ -223,16 +233,21 @@ export async function GET(request: Request) {
                 )
             );
 
-            // Kết hợp và loại bỏ trùng lặp
             const combinedDocs = [...regexDocs, ...keywordDocs];
             const uniqueDocs = Array.from(new Set(combinedDocs.map(doc => doc.id)))
                 .map(id => combinedDocs.find(doc => doc.id === id));
 
-            return createCorsResponse({
+            // Lưu kết quả vào cache
+            const responseData = {
                 data: uniqueDocs,
                 pagination: null,
                 tags: await collection.distinct('tags')
-            });
+            };
+
+            const compressedData = await gzipAsync(JSON.stringify(responseData));
+            await redis.set(searchCacheKey, compressedData, 'EX', 3600); // Cache 1 giờ
+
+            return createCorsResponse(responseData);
         }
 
 

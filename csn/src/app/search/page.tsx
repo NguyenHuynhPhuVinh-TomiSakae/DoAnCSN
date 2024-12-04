@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -7,6 +8,7 @@ import { motion } from 'framer-motion';
 import { Be_Vietnam_Pro } from 'next/font/google';
 import { SelectedToolDetail } from '@/components/SelectedToolDetail';
 import anime from 'animejs';
+import gsap from 'gsap';
 
 const beVietnamPro = Be_Vietnam_Pro({
     subsets: ['vietnamese'],
@@ -40,24 +42,33 @@ export default function SearchPage() {
     useEffect(() => {
         window.scrollTo(0, 0);
         setSelectedTool(null);
+        setIsLoading(true);
 
         const fetchSearchResults = async () => {
-            if (!query) return;
+            if (!query) {
+                setIsLoading(false);
+                setTools([]);
+                return;
+            }
 
             try {
                 const response = await fetch(`/api/showai?q=${encodeURIComponent(query)}`);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
                 const data = await response.json();
-                const sortedTools = data.data.sort((a: Tool, b: Tool) => b.view - a.view);
+                const sortedTools = data.data.sort((a: Tool, b: Tool) => b[sortBy] - a[sortBy]);
                 setTools(sortedTools);
             } catch (error) {
                 console.error('Lỗi khi tìm kiếm:', error);
+                setTools([]);
             } finally {
                 setIsLoading(false);
             }
         };
 
         fetchSearchResults();
-    }, [query]);
+    }, [query, sortBy]);
 
     useEffect(() => {
         const searchInput = document.querySelector('input[type="text"]') as HTMLInputElement;
@@ -68,9 +79,7 @@ export default function SearchPage() {
 
     const handleSearch = () => {
         if (!searchValue.trim()) return;
-        setIsLoading(true);
-        setSelectedTool(null);
-        router.push(`/search?q=${encodeURIComponent(searchValue)}`);
+        router.push(`/search?q=${encodeURIComponent(searchValue.trim())}`);
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -137,7 +146,67 @@ export default function SearchPage() {
     };
 
     const toggleLayout = () => {
-        setIsGridLayout(!isGridLayout);
+        const cards = document.querySelectorAll('[data-tool-id]');
+
+        cards.forEach((card: any) => {
+            const imageContainer = card.querySelector('.image-container');
+            const contentContainer = card.querySelector('.content-container');
+            const description = card.querySelector('.text-gray-600');
+            const imageWrapper = card.querySelector('.image-wrapper');
+
+            if (isGridLayout) {
+                // Chuyển từ grid sang list
+                gsap.to(imageWrapper, {
+                    width: '20%', // Giảm xuống 20%
+                    duration: 0.5
+                });
+
+                gsap.to(imageContainer, {
+                    paddingBottom: '65%', // Giảm xuống 65%
+                    duration: 0.5
+                });
+
+                gsap.to(contentContainer, {
+                    width: '80%', // Tăng lên 80%
+                    duration: 0.5
+                });
+
+                if (description) {
+                    gsap.fromTo(description,
+                        { opacity: 0, y: 20 },
+                        { opacity: 1, y: 0, duration: 0.3, delay: 0.3 }
+                    );
+                }
+            } else {
+                // Chuyển từ list sang grid
+                gsap.to(imageWrapper, {
+                    width: '100%',
+                    duration: 0.5
+                });
+
+                gsap.to(imageContainer, {
+                    paddingBottom: '60%',
+                    duration: 0.5
+                });
+
+                gsap.to(contentContainer, {
+                    width: '100%',
+                    duration: 0.5
+                });
+
+                if (description) {
+                    gsap.to(description, {
+                        opacity: 0,
+                        y: -20,
+                        duration: 0.3
+                    });
+                }
+            }
+        });
+
+        setTimeout(() => {
+            setIsGridLayout(!isGridLayout);
+        }, 500);
     };
 
     const handleSortClick = () => {
@@ -283,32 +352,51 @@ export default function SearchPage() {
 
                         <div id="search-main-content" style={{ display: selectedTool ? 'none' : 'block' }}>
                             <div className={`grid ${isGridLayout ? 'grid-cols-1 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-1'} gap-6`}>
-                                {tools.map((tool) => (
+                                {tools.map((tool, index) => (
                                     <motion.div
                                         key={tool.id}
                                         data-tool-id={tool.id}
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        className={`bg-white rounded-xl overflow-hidden cursor-pointer ${isGridLayout ? '' : 'flex'}`}
+                                        transition={{ duration: 0.5, delay: index * 0.1 }}
+                                        className="bg-white rounded-xl overflow-hidden cursor-pointer transform-gpu"
+                                        style={{ display: 'flex', flexDirection: isGridLayout ? 'column' : 'row' }}
                                         onClick={() => handleToolClick(tool)}
                                     >
-                                        <div className={`relative ${isGridLayout ? 'h-48' : 'w-1/3'}`}>
-                                            <Image
-                                                src={tool.image || '/placeholder.jpg'}
-                                                alt={tool.name}
-                                                fill
-                                                className="object-cover"
-                                            />
+                                        <div className="image-wrapper transition-all duration-500"
+                                            style={{ width: isGridLayout ? '100%' : '20%' }}>
+                                            <div className="image-container relative transition-all duration-500"
+                                                style={{
+                                                    paddingBottom: isGridLayout ? '60%' : '65%',
+                                                    position: 'relative'
+                                                }}>
+                                                <Image
+                                                    src={tool.image || '/placeholder.jpg'}
+                                                    alt={tool.name}
+                                                    fill
+                                                    className="object-cover"
+                                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                                />
+                                            </div>
                                         </div>
-                                        <div className={`p-3 ${isGridLayout ? '' : 'w-2/3'}`}>
+                                        <div className="content-container p-3 transition-all duration-500"
+                                            style={{
+                                                width: isGridLayout ? '100%' : '80%',
+                                                fontSize: isGridLayout ? '1.1rem' : '1.5rem'
+                                            }}>
                                             <div className="flex justify-between items-center px-2">
-                                                <h2 className="text-lg font-medium text-black">
+                                                <h2 className={`font-medium text-black ${isGridLayout ? 'text-xl' : 'text-2xl'}`}>
                                                     {tool.name}
                                                 </h2>
-                                                <div className="flex items-center gap-1">
+                                                <div className="flex items-center gap-2"
+                                                    style={{ fontSize: isGridLayout ? '1.2rem' : '2rem' }}>
                                                     {sortBy === 'view' ? (
                                                         <>
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                                className={`${isGridLayout ? 'h-5 w-5' : 'h-8 w-8'}`}
+                                                                fill="none"
+                                                                viewBox="0 0 24 24"
+                                                                stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                             </svg>
@@ -316,14 +404,22 @@ export default function SearchPage() {
                                                         </>
                                                     ) : sortBy === 'heart' ? (
                                                         <>
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                                className={`${isGridLayout ? 'h-5 w-5' : 'h-8 w-8'}`}
+                                                                fill="none"
+                                                                viewBox="0 0 24 24"
+                                                                stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                                                             </svg>
                                                             <span>{tool.heart}</span>
                                                         </>
                                                     ) : (
                                                         <>
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                                className={`${isGridLayout ? 'h-5 w-5' : 'h-8 w-8'}`}
+                                                                fill="none"
+                                                                viewBox="0 0 24 24"
+                                                                stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
                                                             </svg>
                                                             <span>{Number(tool.evaluation).toFixed(1)}</span>
@@ -332,7 +428,15 @@ export default function SearchPage() {
                                                 </div>
                                             </div>
                                             {!isGridLayout && (
-                                                <p className="text-sm text-gray-600 mt-2">
+                                                <p className="text-gray-600 mt-2 transition-all duration-300 line-clamp-2 overflow-hidden"
+                                                    style={{
+                                                        fontSize: '1.25rem',
+                                                        display: '-webkit-box',
+                                                        WebkitLineClamp: '2',
+                                                        WebkitBoxOrient: 'vertical',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis'
+                                                    }}>
                                                     {tool.description[0]}
                                                 </p>
                                             )}
