@@ -42,7 +42,7 @@ const Navbar = () => {
             if (isSearchPage) return;
 
             const scrollPosition = window.scrollY;
-            setHasScrolled(scrollPosition > 0);
+            setHasScrolled(true);
 
             const threshold = window.innerHeight * 0.8;
             const newIsDark = scrollPosition > threshold;
@@ -175,6 +175,74 @@ const Navbar = () => {
             element.scrollIntoView({ behavior: 'smooth' });
         }
     };
+
+    useEffect(() => {
+        if (!pathname) return;
+
+        const resetAnimation = () => {
+            // Reset states
+            setIsIntroView(false);
+            setIsDark(false);
+            setIsNavHovered(false);
+            setHoveredTitle(null);
+            setShouldAnimate(false);
+            setHoverText(false);
+            setHasScrolled(false);
+
+            // Xử lý riêng cho lineRef
+            if (lineRef.current) {
+                gsap.killTweensOf(lineRef.current);
+                gsap.set(lineRef.current, {
+                    height: '8rem',  // Set chiều cao mặc định
+                    clearProps: "width,opacity,x,y"
+                });
+            }
+
+            // Xử lý các ref khác
+            const otherRefs = [
+                line1Ref.current,
+                line2Ref.current,
+                line3Ref.current,
+                text1Ref.current,
+                text2Ref.current,
+                inputRef.current
+            ].filter(ref => ref !== null);
+
+            if (otherRefs.length > 0) {
+                gsap.killTweensOf(otherRefs);
+                otherRefs.forEach(ref => {
+                    if (ref) {
+                        gsap.set(ref, { clearProps: "all" });
+                    }
+                });
+            }
+
+            // Delay nhỏ trước khi trigger animation mới
+            setTimeout(() => {
+                setShouldAnimate(true);
+            }, 100);
+        };
+
+        // Thực hiện reset
+        resetAnimation();
+
+        // Cleanup function
+        return () => {
+            const allRefs = [
+                lineRef.current,
+                line1Ref.current,
+                line2Ref.current,
+                line3Ref.current,
+                text1Ref.current,
+                text2Ref.current,
+                inputRef.current
+            ].filter(ref => ref !== null);
+
+            if (allRefs.length > 0) {
+                gsap.killTweensOf(allRefs);
+            }
+        };
+    }, [pathname]);
 
     return (
         <motion.nav
