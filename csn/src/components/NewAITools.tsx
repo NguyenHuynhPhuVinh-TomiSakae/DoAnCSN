@@ -49,7 +49,7 @@ export default function NewAITools() {
     }, []);
 
     return (
-        <div id="new-ai-tools" className={`bg-black text-white py-24 ${beVietnamPro.className}`}>
+        <div id="new-ai-tools" className={`bg-black text-white pt-24 ${beVietnamPro.className}`}>
             <motion.div
                 ref={ref}
                 className="container mx-auto px-8"

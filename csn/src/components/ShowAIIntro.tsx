@@ -395,7 +395,7 @@ export default function ShowAIIntro() {
         >
             <div className="absolute inset-0 bg-black fixed" />
 
-            <div className="relative z-10 py-24">
+            <div className="relative z-10 pt-24">
                 <motion.div
                     ref={descriptionRef}
                     className="text-center mb-24 px-8"
