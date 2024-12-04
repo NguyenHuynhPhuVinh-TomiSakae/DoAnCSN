@@ -6,6 +6,7 @@ import { useLoading } from '@/context/LoadingContext';
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
+import { usePathname } from 'next/navigation';
 
 const beVietnamPro = Be_Vietnam_Pro({
     subsets: ['vietnamese'],
@@ -30,10 +31,13 @@ const Navbar = () => {
     const [isInNewAITools, setIsInNewAITools] = useState(false);
     const [hoveredTitle, setHoveredTitle] = useState<string | null>(null);
     const [isNavHovered, setIsNavHovered] = useState(false);
-
+    const pathname = usePathname();
+    const isSearchPage = pathname.includes('/search');
 
     useEffect(() => {
         const handleScroll = () => {
+            if (isSearchPage) return;
+
             const scrollPosition = window.scrollY;
             const threshold = window.innerHeight * 0.8;
             const newIsDark = scrollPosition > threshold;
@@ -49,9 +53,11 @@ const Navbar = () => {
 
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [isDark]);
+    }, [isDark, isSearchPage]);
 
     useEffect(() => {
+        if (isSearchPage) return;
+
         const handleScroll = () => {
             const showAIIntroElement = document.querySelector('.showai-intro');
             if (showAIIntroElement) {
@@ -62,9 +68,11 @@ const Navbar = () => {
 
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+    }, [isSearchPage]);
 
     useEffect(() => {
+        if (isSearchPage) return;
+
         const handleScroll = () => {
             const aiRankingElement = document.querySelector('#ai-ranking');
             if (aiRankingElement) {
@@ -75,9 +83,11 @@ const Navbar = () => {
 
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+    }, [isSearchPage]);
 
     useEffect(() => {
+        if (isSearchPage) return;
+
         const handleScroll = () => {
             const newAIToolsElement = document.querySelector('#new-ai-tools');
             if (newAIToolsElement) {
@@ -88,7 +98,7 @@ const Navbar = () => {
 
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+    }, [isSearchPage]);
 
     gsap.registerPlugin(TextPlugin);
 
@@ -195,11 +205,11 @@ const Navbar = () => {
                             ? 'text-black'
                             : 'text-white'
                         : 'text-black'
-                    } ${(hoveredTitle === 'hover' && isNavHovered) ? '' : 'font-bold'}`}
+                    } ${(hoveredTitle === 'hover' && isNavHovered && !isSearchPage) ? '' : 'font-bold'}`}
                 onMouseEnter={() => setHoveredTitle('hover')}
             >
                 <AnimatePresence mode="wait">
-                    {(hoveredTitle === 'hover' && isNavHovered) ? (
+                    {(hoveredTitle === 'hover' && isNavHovered && !isSearchPage) ? (
                         <motion.div
                             className="flex items-center gap-4"
                             initial={{ opacity: 0, x: 0 }}
@@ -297,19 +307,21 @@ const Navbar = () => {
                             transition={{ duration: 0.3, ease: "easeInOut" }}
                             key="menu-collapsed"
                         >
-                            {isInNewAITools
-                                ? 'MỚI NHẤT'
-                                : isInAIRanking
-                                    ? 'XẾP HẠNG'
-                                    : isIntroView
-                                        ? 'PHÂN LOẠI'
-                                        : 'TRANG CHỦ'}
+                            {isSearchPage
+                                ? 'TÌM KIẾM'
+                                : isInNewAITools
+                                    ? 'MỚI NHẤT'
+                                    : isInAIRanking
+                                        ? 'XẾP HẠNG'
+                                        : isIntroView
+                                            ? 'PHÂN LOẠI'
+                                            : 'TRANG CHỦ'}
                         </motion.div>
                     )}
                 </AnimatePresence>
             </div>
 
-            {isIntroView && (
+            {isIntroView && !isSearchPage && (
                 <div className="fixed left-1/2 -translate-x-1/2" style={{
                     top: '4px',
                     zIndex: 60,
@@ -366,75 +378,77 @@ const Navbar = () => {
                             : 'text-white'
                         : 'text-black'
                     }`} />
-                <div ref={lineRef} className={`absolute top-full left-1/2 transform -translate-x-1/2 w-0.5 transition-colors duration-300 ${isDark || isInShowAIIntro
-                    ? isInAIRanking
-                        ? 'bg-black'
-                        : 'bg-white'
-                    : 'bg-black'
-                    }`}>
-                    {!isIntroView && (
-                        <>
-                            <div className="absolute top-8">
-                                <div className="flex items-center">
-                                    <div ref={line1Ref} className={`w-16 h-0.5 -translate-x-16 transition-colors duration-300 ${isDark || isInShowAIIntro
-                                        ? isInAIRanking
-                                            ? 'bg-black'
-                                            : 'bg-white'
-                                        : 'bg-black'
-                                        }`}></div>
-                                    <div ref={text1Ref} className={`absolute left-0 -translate-x-20 border-2 transition-colors duration-300 ${isDark || isInShowAIIntro
-                                        ? isInAIRanking
-                                            ? 'border-black text-black bg-white'
-                                            : 'border-white text-white bg-black'
-                                        : 'border-black text-black bg-white'
-                                        } rounded-lg px-5 py-1.5 whitespace-nowrap`}>
-                                        {isIntroView ? "Phân tích" : "Xin chào!"}
+                {!isSearchPage && (
+                    <div ref={lineRef} className={`absolute top-full left-1/2 transform -translate-x-1/2 w-0.5 transition-colors duration-300 ${isDark || isInShowAIIntro
+                        ? isInAIRanking
+                            ? 'bg-black'
+                            : 'bg-white'
+                        : 'bg-black'
+                        }`}>
+                        {!isIntroView && (
+                            <>
+                                <div className="absolute top-8">
+                                    <div className="flex items-center">
+                                        <div ref={line1Ref} className={`w-16 h-0.5 -translate-x-16 transition-colors duration-300 ${isDark || isInShowAIIntro
+                                            ? isInAIRanking
+                                                ? 'bg-black'
+                                                : 'bg-white'
+                                            : 'bg-black'
+                                            }`}></div>
+                                        <div ref={text1Ref} className={`absolute left-0 -translate-x-20 border-2 transition-colors duration-300 ${isDark || isInShowAIIntro
+                                            ? isInAIRanking
+                                                ? 'border-black text-black bg-white'
+                                                : 'border-white text-white bg-black'
+                                            : 'border-black text-black bg-white'
+                                            } rounded-lg px-5 py-1.5 whitespace-nowrap`}>
+                                            {isIntroView ? "Phân tích" : "Xin chào!"}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="absolute top-20">
-                                <div className="flex items-center">
-                                    <div ref={line2Ref} className={`w-16 h-0.5 -translate-x-16 transition-colors duration-300 ${isDark || isInShowAIIntro
-                                        ? isInAIRanking
-                                            ? 'bg-black'
-                                            : 'bg-white'
-                                        : 'bg-black'
-                                        }`}></div>
-                                    <div ref={text2Ref} className={`absolute left-0 -translate-x-20 border-2 transition-colors duration-300 ${isDark || isInShowAIIntro
-                                        ? isInAIRanking
-                                            ? 'border-black text-black bg-white'
-                                            : 'border-white text-white bg-black'
-                                        : 'border-black text-black bg-white'
-                                        } rounded-lg px-5 py-1.5 whitespace-nowrap`}>
-                                        Mình có thể giúp gì cho bạn?
+                                <div className="absolute top-20">
+                                    <div className="flex items-center">
+                                        <div ref={line2Ref} className={`w-16 h-0.5 -translate-x-16 transition-colors duration-300 ${isDark || isInShowAIIntro
+                                            ? isInAIRanking
+                                                ? 'bg-black'
+                                                : 'bg-white'
+                                            : 'bg-black'
+                                            }`}></div>
+                                        <div ref={text2Ref} className={`absolute left-0 -translate-x-20 border-2 transition-colors duration-300 ${isDark || isInShowAIIntro
+                                            ? isInAIRanking
+                                                ? 'border-black text-black bg-white'
+                                                : 'border-white text-white bg-black'
+                                            : 'border-black text-black bg-white'
+                                            } rounded-lg px-5 py-1.5 whitespace-nowrap`}>
+                                            Mình có thể giúp gì cho bạn?
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="absolute top-32">
-                                <div className="flex items-center">
-                                    <div ref={line3Ref} className={`w-16 h-0.5 -translate-x-16 transition-colors duration-300 ${isDark || isInShowAIIntro
-                                        ? isInAIRanking
-                                            ? 'bg-black'
-                                            : 'bg-white'
-                                        : 'bg-black'
-                                        }`}></div>
-                                    <div ref={inputRef} className="absolute left-0 -translate-x-20">
-                                        <input
-                                            type="text"
-                                            placeholder="Nhập câu hỏi của bạn..."
-                                            className={`border-2 transition-colors duration-300 ${isDark || isInShowAIIntro
-                                                ? isInAIRanking
-                                                    ? 'border-black text-black bg-white placeholder-gray-600'
-                                                    : 'border-white text-white bg-black placeholder-gray-400'
-                                                : 'border-black text-black bg-white placeholder-gray-600'
-                                                } rounded-lg px-5 py-1.5 w-72 focus:outline-none`}
-                                        />
+                                <div className="absolute top-32">
+                                    <div className="flex items-center">
+                                        <div ref={line3Ref} className={`w-16 h-0.5 -translate-x-16 transition-colors duration-300 ${isDark || isInShowAIIntro
+                                            ? isInAIRanking
+                                                ? 'bg-black'
+                                                : 'bg-white'
+                                            : 'bg-black'
+                                            }`}></div>
+                                        <div ref={inputRef} className="absolute left-0 -translate-x-20">
+                                            <input
+                                                type="text"
+                                                placeholder="Nhập câu hỏi của bạn..."
+                                                className={`border-2 transition-colors duration-300 ${isDark || isInShowAIIntro
+                                                    ? isInAIRanking
+                                                        ? 'border-black text-black bg-white placeholder-gray-600'
+                                                        : 'border-white text-white bg-black placeholder-gray-400'
+                                                    : 'border-black text-black bg-white placeholder-gray-600'
+                                                    } rounded-lg px-5 py-1.5 w-72 focus:outline-none`}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </>
-                    )}
-                </div>
+                            </>
+                        )}
+                    </div>
+                )}
             </div>
         </motion.nav>
     );

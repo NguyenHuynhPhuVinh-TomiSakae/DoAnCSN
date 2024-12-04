@@ -11,6 +11,7 @@ import { useLoading } from '@/context/LoadingContext';
 import Marquee from 'react-fast-marquee';
 import ShowAIIntro from '@/components/ShowAIIntro';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
+import { useRouter } from 'next/navigation';
 
 interface LoadingProps {
   onLoadComplete: () => void;
@@ -65,6 +66,22 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
 
   // Thêm ref cho input
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const router = useRouter();
+
+  // Thêm hàm xử lý tìm kiếm
+  const handleSearch = () => {
+    if (searchValue.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchValue.trim())}`);
+    }
+  };
+
+  // Thêm hàm xử lý khi nhấn Enter
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   // Sửa đổi hàm animateProgress
   const animateProgress = (targetProgress: number) => {
@@ -375,6 +392,7 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
                         type="text"
                         value={searchValue}
                         onChange={(e) => setSearchValue(e.target.value)}
+                        onKeyPress={handleKeyPress}
                         placeholder="Tìm kiếm công cụ AI..."
                         className="w-full bg-transparent text-3xl font-medium outline-none placeholder:text-gray-400"
                       />
@@ -384,7 +402,10 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
               </div>
 
               {currentProgress === 100 && (
-                <div className="search-icon ml-auto pr-6 relative z-20">
+                <div
+                  className="search-icon ml-auto pr-6 relative z-20 cursor-pointer"
+                  onClick={handleSearch}
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -455,8 +476,6 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
 }), { ssr: false });
 
 // Wrapper component
-export default function LoadingWrapper() {
-  const { setIsLoading } = useLoading();
-
-  return <Loading onLoadComplete={() => setIsLoading(false)} />;
+export default function LoadingWrapper(props: LoadingProps) {
+  return <Loading {...props} />;
 }
