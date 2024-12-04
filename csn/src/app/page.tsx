@@ -83,6 +83,11 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
     }
   };
 
+  // Thêm hàm xử lý khi nhấn vào term
+  const handleTermClick = (term: string) => {
+    router.push(`/search?q=${encodeURIComponent(term)}`);
+  };
+
   // Sửa đổi hàm animateProgress
   const animateProgress = (targetProgress: number) => {
     // Nếu đã hoàn thành, không cho phép giảm tiến trình
@@ -449,12 +454,14 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
                     speed={50}
                     gradient={false}
                     direction={index % 2 === 0 ? "left" : "right"}
-                    className="mb-2"
+                    className="mb-2 overflow-y-hidden"
+                    pauseOnHover={true}
                   >
                     {row.map((term, termIndex) => (
                       <div
                         key={termIndex}
-                        className="px-6 py-3 mx-2 border-2 border-black bg-white text-black rounded-lg font-medium text-xl"
+                        className="px-6 py-3 mx-2 border-2 border-black bg-white text-black rounded-lg font-medium text-xl cursor-pointer hover:scale-110 transition-transform duration-300"
+                        onClick={() => handleTermClick(term)}
                       >
                         {term}
                       </div>
