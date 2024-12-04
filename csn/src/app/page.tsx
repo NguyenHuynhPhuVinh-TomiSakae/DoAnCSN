@@ -32,7 +32,7 @@ const orbitron = Orbitron({
 // Cập nhật mảng searchTerms với các từ khóa thân thiện với người dùng hơn
 const searchTerms = [
   // Dòng 1 - Chạy từ phải sang trái
-  ["Tạo ảnh AI", "Chỉnh sửa ảnh", "Xóa phông nền", "Tạo ảnh AI", "Chỉnh sửa ảnh", "Xóa phng nền", "Tạo ảnh AI", "Chỉnh sửa ảnh", "Xóa phông nền"],
+  ["Tạo ảnh AI", "Chỉnh sửa ảnh", "Xóa phông nền", "Tạo ảnh AI", "Chỉnh sửa ảnh", "Xóa phông nền", "Tạo ảnh AI", "Chỉnh sửa ảnh", "Xóa phông nền"],
   // Dòng 2 - Chạy từ trái sang phải  
   ["Tạo video AI", "Lồng tiếng video", "Chuyển giọng nói", "Tạo video AI", "Lồng tiếng video", "Chuyển giọng nói", "Tạo video AI", "Lồng tiếng video", "Chuyển giọng nói"],
   // Dòng 3 - Chạy từ phải sang trái
@@ -399,7 +399,7 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
                         onChange={(e) => setSearchValue(e.target.value)}
                         onKeyPress={handleKeyPress}
                         placeholder="Tìm kiếm công cụ AI..."
-                        className="w-full bg-transparent text-3xl font-medium outline-none placeholder:text-gray-400"
+                        className="w-full bg-transparent text-3xl font-medium outline-none placeholder:text-black"
                       />
                     </motion.div>
                   )}
