@@ -52,7 +52,10 @@ const FeatureItem = ({ feature, theme, borderColor }: FeatureItemProps) => {
                     <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                        d={isHovered
+                            ? "M15.75 19.5L8.25 12l7.5-7.5"
+                            : "M8.25 4.5l7.5 7.5-7.5 7.5"
+                        }
                     />
                 </svg>
                 <span className="w-full">

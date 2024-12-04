@@ -24,21 +24,11 @@ const orbitron = Orbitron({
 // Tạo component con
 function AISection({ tag, index, tagTranslations, allTools, onToolClick, selectedTool, isVisible }: any) {
     const ref = useRef(null);
-    const [shouldAnimate, setShouldAnimate] = useState(true);
     const isInView = useInView(ref, {
-        once: shouldAnimate,
         amount: 0.2,
-        margin: "0px 0px -100px 0px"
+        margin: "0px 0px -100px 0px",
+        once: true
     });
-
-    // Reset animation khi component được hiện lại
-    useEffect(() => {
-        if (isVisible) {
-            setShouldAnimate(true);
-        } else {
-            setShouldAnimate(false);
-        }
-    }, [isVisible]);
 
     // Sử dụng state để lưu trữ currentPage và currentTools cho từng tag
     const [currentPage, setCurrentPage] = useState(0);
@@ -47,15 +37,13 @@ function AISection({ tag, index, tagTranslations, allTools, onToolClick, selecte
         return index % 2 === 0 ? allTools.slice(0, 3) : [...allTools].slice(0, 3).reverse();
     });
 
-    const handleNextTools = () => {
-        const nextPage = currentPage + 1;
-        const startIndex = nextPage * 3;
-        let nextTools = allTools.slice(startIndex, startIndex + 3);
+    const [hoveredNext, setHoveredNext] = useState(false);
+    const [hoveredPrev, setHoveredPrev] = useState(false);
 
-        if (nextTools.length === 0) {
-            nextTools = allTools.slice(0, 3);
-            setCurrentPage(0);
-        }
+    const handleNextTools = () => {
+        const nextPage = (currentPage + 1) % Math.ceil(allTools.length / 3);
+        const startIndex = nextPage * 3;
+        const nextTools = allTools.slice(startIndex, startIndex + 3);
 
         // Đảo ngược thứ tự hiển thị nếu là bên phải
         setCurrentTools(index % 2 === 0 ? nextTools : [...nextTools].reverse());
@@ -63,19 +51,15 @@ function AISection({ tag, index, tagTranslations, allTools, onToolClick, selecte
     };
 
     const handlePrevTools = () => {
-        if (currentPage > 0) {
-            const prevPage = currentPage - 1;
-            const startIndex = prevPage * 3;
-            const prevTools = allTools.slice(startIndex, startIndex + 3);
-            setCurrentTools(index % 2 === 0 ? prevTools : [...prevTools].reverse());
-            setCurrentPage(prevPage);
-        } else {
-            const lastPage = Math.floor((allTools.length - 1) / 3);
-            const startIndex = lastPage * 3;
-            const lastTools = allTools.slice(startIndex, startIndex + 3);
-            setCurrentTools(index % 2 === 0 ? lastTools : [...lastTools].reverse());
-            setCurrentPage(lastPage);
-        }
+        const prevPage = currentPage === 0
+            ? Math.ceil(allTools.length / 3) - 1
+            : currentPage - 1;
+        const startIndex = prevPage * 3;
+        const prevTools = allTools.slice(startIndex, startIndex + 3);
+
+        // Đảo ngược thứ tự hiển thị nếu là bên phải
+        setCurrentTools(index % 2 === 0 ? prevTools : [...prevTools].reverse());
+        setCurrentPage(prevPage);
     };
 
     const handleImageClick = (tool: any) => {
@@ -201,8 +185,10 @@ function AISection({ tag, index, tagTranslations, allTools, onToolClick, selecte
                             </div>
                         ))}
                         <div
-                            className="flex items-center justify-center group cursor-pointer transition-transform duration-300 hover:bg-white"
+                            className="flex items-center justify-center cursor-pointer hover:bg-white group"
                             onClick={handleNextTools}
+                            onMouseEnter={() => setHoveredNext(true)}
+                            onMouseLeave={() => setHoveredNext(false)}
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -210,17 +196,23 @@ function AISection({ tag, index, tagTranslations, allTools, onToolClick, selecte
                                 viewBox="0 0 24 24"
                                 strokeWidth={2}
                                 stroke="currentColor"
-                                className="w-32 h-32 text-white group-hover:text-black transform transition-all duration-500 ease-in-out group-hover:translate-x-4"
+                                className="w-32 h-32 text-white group-hover:text-black"
                             >
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d={`M${!hoveredNext ? '9 5l7 7-7 7' : '9 8l7 4-7 4'}`}
+                                />
                             </svg>
                         </div>
                     </>
                 ) : (
                     <>
                         <div
-                            className="flex items-center justify-center group cursor-pointer transition-transform duration-300 hover:bg-white"
+                            className="flex items-center justify-center cursor-pointer hover:bg-white group"
                             onClick={handlePrevTools}
+                            onMouseEnter={() => setHoveredPrev(true)}
+                            onMouseLeave={() => setHoveredPrev(false)}
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -228,9 +220,13 @@ function AISection({ tag, index, tagTranslations, allTools, onToolClick, selecte
                                 viewBox="0 0 24 24"
                                 strokeWidth={2}
                                 stroke="currentColor"
-                                className="w-32 h-32 text-white group-hover:text-black transform transition-all duration-500 ease-in-out group-hover:-translate-x-4"
+                                className="w-32 h-32 text-white group-hover:text-black"
                             >
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d={`M${!hoveredPrev ? '15 19l-7-7 7-7' : '15 16l-7-4 7-4'}`}
+                                />
                             </svg>
                         </div>
                         {currentTools.map((tool: any) => (
