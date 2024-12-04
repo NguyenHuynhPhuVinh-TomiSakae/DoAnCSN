@@ -38,6 +38,7 @@ const Navbar = () => {
     const [hasScrolled, setHasScrolled] = useState(false);
     const [searchValue, setSearchValue] = useState('');
     const searchInputRef = useRef<HTMLInputElement>(null);
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -190,6 +191,7 @@ const Navbar = () => {
             setShouldAnimate(false);
             setHoverText(false);
             setHasScrolled(false);
+            setSearchValue('');
 
             // Xử lý riêng cho lineRef
             if (lineRef.current) {
@@ -258,6 +260,15 @@ const Navbar = () => {
         }
     };
 
+    useEffect(() => {
+        // Thêm một timeout ngắn để đảm bảo animation chạy sau khi component được mount
+        const timer = setTimeout(() => {
+            setIsInitialLoad(false);
+        }, 100);
+
+        return () => clearTimeout(timer);
+    }, []);
+
     return (
         <motion.nav
             className={`fixed top-0 left-0 right-0 h-16 z-50 flex justify-between items-center px-8 transition-colors duration-300 ${isInNewAITools
@@ -270,13 +281,13 @@ const Navbar = () => {
                 }`}
             initial={{ opacity: 0, y: -20 }}
             animate={{
-                opacity: isLoading ? 0 : 1,
-                y: isLoading ? -20 : 0
+                opacity: isSearchPage ? (isInitialLoad ? 0 : 1) : (isLoading ? 0 : 1),
+                y: isSearchPage ? (isInitialLoad ? -20 : 0) : (isLoading ? -20 : 0)
             }}
             transition={{
                 duration: 0.8,
                 ease: "easeOut",
-                delay: isLoading ? 0 : 2
+                delay: isSearchPage ? (isInitialLoad ? 0 : 0.2) : (isLoading ? 0 : 0.2)
             }}
             onMouseEnter={() => hasScrolled && setIsNavHovered(true)}
             onMouseLeave={() => {
