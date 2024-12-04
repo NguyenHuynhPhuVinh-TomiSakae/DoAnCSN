@@ -27,6 +27,7 @@ const Navbar = () => {
     const [shouldAnimate, setShouldAnimate] = useState(true);
     const [isInShowAIIntro, setIsInShowAIIntro] = useState(false);
     const [isInAIRanking, setIsInAIRanking] = useState(false);
+    const [isInNewAITools, setIsInNewAITools] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -66,6 +67,19 @@ const Navbar = () => {
             if (aiRankingElement) {
                 const rect = aiRankingElement.getBoundingClientRect();
                 setIsInAIRanking(rect.top <= 0 && rect.bottom >= 0);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const newAIToolsElement = document.querySelector('#new-ai-tools');
+            if (newAIToolsElement) {
+                const rect = newAIToolsElement.getBoundingClientRect();
+                setIsInNewAITools(rect.top <= 0 && rect.bottom >= 0);
             }
         };
 
@@ -139,11 +153,11 @@ const Navbar = () => {
 
     return (
         <motion.nav
-            className={`fixed top-0 left-0 right-0 h-16 z-50 flex justify-between items-center px-8 transition-colors duration-300 ${isDark || isInShowAIIntro
-                ? isInAIRanking
-                    ? 'bg-white'
-                    : 'bg-black'
-                : 'bg-white'
+            className={`fixed top-0 left-0 right-0 h-16 z-50 flex justify-between items-center px-8 transition-colors duration-300 ${isDark || isInShowAIIntro || isInNewAITools
+                    ? isInAIRanking
+                        ? 'bg-white'
+                        : 'bg-black'
+                    : 'bg-white'
                 }`}
             initial={{ opacity: 0, y: -20 }}
             animate={{
@@ -156,13 +170,19 @@ const Navbar = () => {
                 delay: isLoading ? 0 : 2
             }}
         >
-            <div className={`${beVietnamPro.className} font-bold text-xl transition-colors duration-300 ${isDark || isInShowAIIntro
-                ? isInAIRanking
-                    ? 'text-black'
-                    : 'text-white'
-                : 'text-black'
+            <div className={`${beVietnamPro.className} font-bold text-xl transition-colors duration-300 ${isDark || isInShowAIIntro || isInNewAITools
+                    ? isInAIRanking
+                        ? 'text-black'
+                        : 'text-white'
+                    : 'text-black'
                 }`}>
-                {isInAIRanking ? 'XẾP HẠNG' : isIntroView ? 'PHÂN LOẠI' : 'TRANG CHỦ'}
+                {isInAIRanking
+                    ? 'XẾP HẠNG'
+                    : isInNewAITools
+                        ? 'MỚI NHẤT'
+                        : isIntroView
+                            ? 'PHÂN LOẠI'
+                            : 'TRANG CHỦ'}
             </div>
 
             {isIntroView && (

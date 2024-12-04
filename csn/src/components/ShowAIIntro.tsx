@@ -8,6 +8,7 @@ import { useInView } from 'framer-motion';
 import anime from 'animejs';
 import { SelectedToolDetail } from './SelectedToolDetail';
 import AIRanking from './AIRanking';
+import NewAITools from './NewAITools';
 
 const beVietnamPro = Be_Vietnam_Pro({
     subsets: ['vietnamese'],
@@ -308,12 +309,12 @@ export default function ShowAIIntro() {
     // Thêm object ánh xạ tag sang tiếng Việt
     const tagTranslations: { [key: string]: string } = {
         'Video': 'Tạo video',
-        'Code': 'Hỗ trợ lập trình',
         'Image': 'Tạo hình ảnh',
-        'Web': 'Công cụ Web',
-        'Data': 'Xử lý dữ liệu',
         'Chat': 'Trò chuyện AI',
+        'Data': 'Xử lý dữ liệu',
+        'Code': 'Hỗ trợ lập trình',
         'App': 'Ứng dụng AI',
+        'Web': 'Công cụ Web',
     };
 
     // Thêm ref và useInView cho phần mô tả
@@ -436,6 +437,7 @@ export default function ShowAIIntro() {
                     ))}
                 </div>
                 {!selectedTool && <AIRanking />}
+                {!selectedTool && <NewAITools />}
             </div>
         </motion.div>
     );

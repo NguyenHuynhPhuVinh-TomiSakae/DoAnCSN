@@ -194,10 +194,11 @@ export default function AIRanking() {
                     transition={{ duration: 0.8 }}
                 >
                     <h1 className={`${orbitron.className} text-6xl font-bold mb-8 tracking-wider text-black`}>
-                        Top Công Cụ AI
+                        Top Những Công Cụ AI
                     </h1>
                     <p className="text-2xl text-black max-w-4xl mx-auto leading-relaxed font-medium">
-                        Khám phá những công cụ AI được yêu thích nhất dựa trên lượt xem, đánh giá và tương tác từ cộng đồng người dùng.
+                        Tổng hợp những công cụ AI hàng đầu được cộng đồng sử dụng nhiều nhất,
+                        giúp bạn nâng cao hiệu suất công việc trong từng lĩnh vực.
                     </p>
                 </motion.div>
 
