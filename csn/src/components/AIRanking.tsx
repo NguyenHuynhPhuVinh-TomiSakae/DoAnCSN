@@ -4,6 +4,8 @@ import { Be_Vietnam_Pro, Orbitron } from 'next/font/google';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
+import { SelectedToolDetail } from './SelectedToolDetail';
+import anime from 'animejs';
 
 const beVietnamPro = Be_Vietnam_Pro({
     subsets: ['vietnamese'],
@@ -120,8 +122,66 @@ export default function AIRanking() {
         }
     ];
 
+    const handleToolClick = (tool: Tool) => {
+        const imageElement = document.querySelector(`[data-tool-id="${tool.id}"]`);
+        const targetElement = document.querySelector('#ai-ranking-selected-tool-container');
+        const mainContent = document.querySelector('#ai-ranking-main-content');
+
+        if (imageElement && targetElement && mainContent) {
+            anime({
+                targets: mainContent,
+                opacity: [1, 0],
+                translateY: [0, 50],
+                duration: 500,
+                easing: 'easeOutExpo',
+                complete: () => {
+                    setSelectedTool(tool.id);
+                    window.scrollTo({
+                        top: targetElement.getBoundingClientRect().top + window.pageYOffset - 100,
+                        behavior: 'smooth'
+                    });
+                    anime({
+                        targets: targetElement,
+                        opacity: [0, 1],
+                        translateY: [50, 0],
+                        duration: 500,
+                        easing: 'easeOutExpo'
+                    });
+                }
+            });
+        }
+    };
+
+    const handleBack = () => {
+        const targetElement = document.querySelector('#ai-ranking-selected-tool-container');
+        const mainContent = document.querySelector('#ai-ranking-main-content');
+
+        if (targetElement && mainContent) {
+            anime({
+                targets: targetElement,
+                opacity: [1, 0],
+                translateY: [0, 50],
+                duration: 500,
+                easing: 'easeOutExpo',
+                complete: () => {
+                    setSelectedTool(null);
+                    setTimeout(() => {
+                        anime({
+                            targets: mainContent,
+                            opacity: [0, 1],
+                            translateY: [50, 0],
+                            duration: 500,
+                            easing: 'easeOutExpo'
+                        });
+                    }, 100);
+                }
+            });
+        }
+    };
+
     return (
         <motion.div
+            id="ai-ranking"
             className={`min-h-screen bg-white text-black ${beVietnamPro.className} mt-12`}
         >
             <div className="h-full py-24 px-8">
@@ -144,77 +204,54 @@ export default function AIRanking() {
                 {
                     !isLoading && (
                         <motion.div className="relative max-w-7xl mx-auto">
-                            {/* Số thứ tự và đường kẻ ngang */}
-                            <div
-                                className="absolute left-[-30px] top-[65px] w-12"
-                                style={{ display: selectedTool ? 'none' : 'block' }}
-                            >
-                                {[...Array(9)].map((_, index) => (
-                                    <div key={index} className={`${orbitron.className} text-xl font-bold h-[120px] relative`}>
-                                        <motion.div
-                                            className="absolute left-[-20px] right-[-20px] top-1/2 border-b-2 border-gray-200 -z-10"
-                                            variants={lineVariants}
-                                            initial="hidden"
-                                            whileInView="visible"
-                                            viewport={{ once: true, amount: 0.3 }}
-                                        />
-                                        <motion.span
-                                            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-1"
-                                            initial={{ opacity: 0 }}
-                                            whileInView={{ opacity: 1 }}
-                                            viewport={{ once: true }}
-                                            transition={{ delay: 0.4 }}
-                                        >
-                                            #{index + 1}
-                                        </motion.span>
+                            <div id="ai-ranking-selected-tool-container">
+                                {selectedTool && (
+                                    <div className="pl-12">
+                                        {columnConfig.map(column => {
+                                            const tool = column.tools.find(t => t.id === selectedTool);
+                                            if (!tool) return null;
+                                            return (
+                                                <SelectedToolDetail
+                                                    key={tool.id}
+                                                    selectedTool={tool}
+                                                    onBack={handleBack}
+                                                    theme="light"
+                                                />
+                                            );
+                                        }).filter(Boolean)[0]}
                                     </div>
-                                ))}
+                                )}
                             </div>
 
-                            {/* Grid chính */}
-                            {selectedTool ? (
-                                // Hiển thị chi tiết một tool
-                                <div className="pl-12">
-                                    {columnConfig.map(column => {
-                                        const tool = column.tools.find(t => t.id === selectedTool);
-                                        if (!tool) return null;
-
-                                        return (
+                            <div id="ai-ranking-main-content" style={{ display: selectedTool ? 'none' : 'block' }}>
+                                {/* Số thứ tự và đường kẻ ngang */}
+                                <div
+                                    className="absolute left-[-30px] top-[65px] w-12"
+                                    style={{ display: selectedTool ? 'none' : 'block' }}
+                                >
+                                    {[...Array(9)].map((_, index) => (
+                                        <div key={index} className={`${orbitron.className} text-xl font-bold h-[120px] relative`}>
                                             <motion.div
-                                                key={tool.id}
-                                                className="flex items-center gap-4 h-[120px] -mx-8 px-8 group relative hover:bg-black transition-all duration-300"
-                                                variants={itemVariants}
+                                                className="absolute left-[-20px] right-[-20px] top-1/2 border-b-2 border-gray-200 -z-10"
+                                                variants={lineVariants}
                                                 initial="hidden"
                                                 whileInView="visible"
                                                 viewport={{ once: true, amount: 0.3 }}
+                                            />
+                                            <motion.span
+                                                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-1"
+                                                initial={{ opacity: 0 }}
+                                                whileInView={{ opacity: 1 }}
+                                                viewport={{ once: true }}
+                                                transition={{ delay: 0.4 }}
                                             >
-                                                <div className="flex items-center gap-4 w-full">
-                                                    <div className="relative w-20 h-20">
-                                                        <Image
-                                                            src={tool.image || '/placeholder.jpg'}
-                                                            alt={tool.name}
-                                                            fill
-                                                            className="object-cover rounded-lg"
-                                                        />
-                                                    </div>
-                                                    <div className="font-bold group-hover:text-white transition-colors duration-300">
-                                                        {tool.name}
-                                                    </div>
-                                                    <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-4">
-                                                        <button
-                                                            className="px-4 py-2 border border-white text-white rounded hover:bg-white hover:text-black transition-colors"
-                                                            onClick={() => setSelectedTool(null)}
-                                                        >
-                                                            Đóng
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </motion.div>
-                                        );
-                                    }).filter(Boolean)[0]} {/* Chỉ lấy phần tử đầu tiên tìm thấy */}
+                                                #{index + 1}
+                                            </motion.span>
+                                        </div>
+                                    ))}
                                 </div>
-                            ) : (
-                                // Hiển thị grid bình thường
+
+                                {/* Grid chính */}
                                 <div className="grid grid-cols-3 gap-8 pl-12 divide-x-2 divide-black">
                                     {columnConfig.map((column, colIndex) => (
                                         <div key={colIndex} className={`flex flex-col ${colIndex > 0 ? 'pl-8' : ''}`}>
@@ -231,6 +268,7 @@ export default function AIRanking() {
                                             {column.tools.map((tool, index) => (
                                                 <motion.div
                                                     key={tool.id}
+                                                    data-tool-id={tool.id}
                                                     className="flex items-center gap-4 h-[120px] border-b-2 border-black -mx-8 px-8 group relative hover:bg-black transition-all duration-300"
                                                     variants={itemVariants}
                                                     initial="hidden"
@@ -253,7 +291,7 @@ export default function AIRanking() {
                                                         <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-4">
                                                             <button
                                                                 className="px-4 py-2 border border-white text-white rounded hover:bg-white hover:text-black transition-colors"
-                                                                onClick={() => setSelectedTool(tool.id)}
+                                                                onClick={() => handleToolClick(tool)}
                                                             >
                                                                 Chi tiết
                                                             </button>
@@ -264,7 +302,7 @@ export default function AIRanking() {
                                         </div>
                                     ))}
                                 </div>
-                            )}
+                            </div>
                         </motion.div>
                     )
                 }

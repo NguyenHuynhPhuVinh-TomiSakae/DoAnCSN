@@ -420,6 +420,7 @@ export default function ShowAIIntro() {
                         <SelectedToolDetail
                             selectedTool={selectedTool}
                             onBack={handleBack}
+                            theme="dark"
                         />
                     )}
                 </div>

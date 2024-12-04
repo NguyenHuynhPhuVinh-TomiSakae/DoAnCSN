@@ -1,14 +1,76 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { useState } from 'react';
 import { BackButton } from './BackButton';
 
 interface SelectedToolDetailProps {
     selectedTool: any;
     onBack: () => void;
+    theme?: 'dark' | 'light';
 }
 
-export function SelectedToolDetail({ selectedTool, onBack }: SelectedToolDetailProps) {
+interface FeatureItemProps {
+    feature: string;
+    theme?: 'dark' | 'light';
+    borderColor: string;
+}
+
+const FeatureItem = ({ feature, theme, borderColor }: FeatureItemProps) => {
+    const [title, description] = feature.split(':');
+    const [isHovered, setIsHovered] = useState(false);
+
+    return (
+        <div
+            className={`pl-8 border-b ${borderColor} relative
+                ${theme === 'dark'
+                    ? isHovered ? 'bg-white text-black border-black' : 'text-white'
+                    : isHovered ? 'bg-black text-white border-white' : 'text-black'
+                } cursor-pointer`}
+            style={{
+                margin: '0 -2rem',
+                padding: '1rem 2rem 1rem calc(2rem + 2rem)',
+            }}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            <div className={`absolute left-8 top-1/2 w-6 h-[1px] 
+                ${isHovered
+                    ? theme === 'dark' ? 'border-black' : 'border-white'
+                    : borderColor
+                }`}
+            />
+            <p className="text-lg flex items-start gap-3 w-full">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-5 h-5 flex-shrink-0 mt-1"
+                >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                    />
+                </svg>
+                <span className="w-full">
+                    {isHovered ? (description || title) : title}
+                </span>
+            </p>
+        </div>
+    );
+};
+
+export function SelectedToolDetail({
+    selectedTool,
+    onBack,
+    theme = 'light'
+}: SelectedToolDetailProps) {
+    const textColor = theme === 'dark' ? 'text-white' : 'text-black';
+    const borderColor = theme === 'dark' ? 'border-white/20' : 'border-black/20';
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -18,7 +80,7 @@ export function SelectedToolDetail({ selectedTool, onBack }: SelectedToolDetailP
             className="flex flex-col items-start max-w-[800px] mx-auto"
         >
             <div className="w-full">
-                <BackButton onClick={onBack} />
+                <BackButton onClick={onBack} color={theme === 'dark' ? 'white' : 'black'} />
             </div>
 
             {/* Ảnh */}
@@ -33,15 +95,15 @@ export function SelectedToolDetail({ selectedTool, onBack }: SelectedToolDetailP
 
             {/* Tên và nút truy cập cùng dòng */}
             <div className="w-full flex justify-between items-center mb-12">
-                <h3 className="text-4xl font-bold text-white">{selectedTool.name}</h3>
+                <h3 className={`text-4xl font-bold ${textColor}`}>{selectedTool.name}</h3>
                 <span className="relative inline-flex w-[180px] h-[55px] mx-[15px] [perspective:1000px]">
                     <a
                         href={selectedTool.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-lg tracking-wider [transform-style:preserve-3d] [transform:translateZ(-25px)] transition-transform duration-300 hover:[transform:translateZ(-25px)_rotateX(-90deg)]"
+                        className={`text-lg tracking-wider [transform-style:preserve-3d] [transform:translateZ(-25px)] transition-transform duration-300 hover:[transform:translateZ(-25px)_rotateX(-90deg)]`}
                     >
-                        <span className="absolute w-[180px] h-[55px] flex items-center justify-center gap-2 border-[2px] border-white bg-transparent text-white rounded-[5px] [transform:rotateY(0deg)_translateZ(25px)] text-lg font-medium">
+                        <span className={`absolute w-[180px] h-[55px] flex items-center justify-center gap-2 border-[2px] ${theme === 'dark' ? 'border-white text-white' : 'border-black text-black'} bg-transparent rounded-[5px] [transform:rotateY(0deg)_translateZ(25px)] text-lg font-medium`}>
                             <span>Truy cập</span>
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -58,7 +120,7 @@ export function SelectedToolDetail({ selectedTool, onBack }: SelectedToolDetailP
                                 />
                             </svg>
                         </span>
-                        <span className="absolute w-[180px] h-[55px] flex items-center justify-center gap-2 border-[2px] border-white bg-white text-black rounded-[5px] [transform:rotateX(90deg)_translateZ(25px)] text-lg font-medium">
+                        <span className={`absolute w-[180px] h-[55px] flex items-center justify-center gap-2 border-[2px] ${theme === 'dark' ? 'border-white bg-white text-black' : 'border-black bg-black text-white'} rounded-[5px] [transform:rotateX(90deg)_translateZ(25px)] text-lg font-medium`}>
                             <span>Truy cập</span>
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -83,7 +145,7 @@ export function SelectedToolDetail({ selectedTool, onBack }: SelectedToolDetailP
             <div className="w-full mb-16">
                 <div className="space-y-6">
                     {selectedTool.description?.map((desc: string, index: number) => (
-                        <p key={index} className="text-white text-lg leading-relaxed">
+                        <p key={index} className={`${textColor} text-lg leading-relaxed`}>
                             {desc}
                         </p>
                     ))}
@@ -92,25 +154,24 @@ export function SelectedToolDetail({ selectedTool, onBack }: SelectedToolDetailP
 
             {/* Tính năng chính */}
             <div className="w-full">
-                <h4 className="text-2xl font-medium text-white mb-6 border-b border-white/20 pb-4">
+                <h4 className={`text-2xl font-medium ${textColor} mb-6 border-b ${borderColor} pb-4`}>
                     Tính năng chính
                 </h4>
-                <div className="grid grid-cols-1 gap-4 ml-8 relative">
+                <div className="grid grid-cols-1 gap-0 ml-8 relative">
                     <div
-                        className="absolute left-0 w-[1px] bg-white/20"
+                        className={`absolute left-0 w-[1px] transition-colors duration-300 ${borderColor} group-hover:border-black dark:group-hover:border-white`}
                         style={{
                             top: '-24px',
                             height: 'calc(100% + 24px)'
                         }}
                     />
                     {selectedTool.keyFeatures?.map((feature: string, index: number) => (
-                        <div
+                        <FeatureItem
                             key={index}
-                            className="pl-8 pb-4 border-b border-white/20 relative"
-                        >
-                            <div className="absolute left-0 top-1/2 w-6 h-[1px] bg-white/20" />
-                            <p className="text-white text-lg">{feature}</p>
-                        </div>
+                            feature={feature}
+                            theme={theme}
+                            borderColor={borderColor}
+                        />
                     ))}
                 </div>
             </div>
