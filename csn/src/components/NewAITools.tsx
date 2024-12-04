@@ -34,73 +34,148 @@ export default function NewAITools() {
         once: true
     });
 
-    const [tools, setTools] = useState<Tool[]>([]);
+    const [allTools, setAllTools] = useState<Tool[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const limit = 4;
+
+    const indexOfLastTool = currentPage * limit;
+    const indexOfFirstTool = indexOfLastTool - limit;
+    const currentTools = allTools.slice(indexOfFirstTool, indexOfLastTool);
+    const totalPages = Math.ceil(allTools.length / limit);
 
     useEffect(() => {
-        fetch('/api/showai?limit=6')
+        fetch('/api/showai')
             .then(res => res.json())
             .then(data => {
                 console.log('NewAITools data:', data);
                 if (Array.isArray(data.data)) {
-                    setTools(data.data);
+                    setAllTools(data.data);
                 }
             })
             .catch(err => console.error('Lỗi khi tải dữ liệu công cụ AI mới:', err));
     }, []);
 
+    const nextSlide = () => {
+        setCurrentPage(p => Math.min(totalPages, p + 1));
+    };
+
+    const prevSlide = () => {
+        setCurrentPage(p => Math.max(1, p - 1));
+    };
+
     return (
-        <div id="new-ai-tools" className={`bg-black text-white pt-24 ${beVietnamPro.className}`}>
+        <div id="new-ai-tools" className={`bg-black text-white pt-32 ${beVietnamPro.className}`}>
             <motion.div
                 ref={ref}
-                className="container mx-auto px-8"
+                className="container mx-auto px-8 md:px-16 max-w-7xl"
                 initial={{ opacity: 0, y: 50 }}
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
                 transition={{ duration: 0.5 }}
             >
                 <motion.div
-                    className="text-center mb-16"
+                    className="text-center mb-24"
                     initial={{ y: 50, opacity: 0 }}
                     animate={isInView ? { y: 0, opacity: 1 } : { y: 50, opacity: 0 }}
                     transition={{ duration: 1, ease: "easeOut" }}
                 >
-                    <h2 className={`${orbitron.className} text-6xl font-bold mb-8 tracking-wider`}>
+                    <h2 className={`${orbitron.className} text-5xl md:text-6xl font-bold mb-12 tracking-wider`}>
                         Công Cụ AI Mới Nhất
                     </h2>
-                    <p className="text-2xl text-white max-w-4xl mx-auto leading-relaxed font-medium">
+                    <p className="text-xl md:text-2xl text-white max-w-4xl mx-auto leading-relaxed font-medium px-4">
                         Khám phá những công cụ AI mới nhất được cập nhật liên tục,
                         giúp bạn luôn đi đầu với xu hướng công nghệ.
                     </p>
                 </motion.div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {tools.map((tool) => (
+                <div className="relative h-[300px]">
+                    {currentTools.map((tool, index) => (
                         <motion.div
                             key={tool.id}
-                            className="bg-zinc-900 rounded-lg overflow-hidden hover:shadow-lg transition-shadow border border-zinc-800"
-                            whileHover={{ scale: 1.02 }}
-                            transition={{ duration: 0.2 }}
+                            className="absolute w-full lg:w-1/4 px-4"
+                            initial={{
+                                x: 0,
+                                y: 0,
+                                zIndex: 10 - index
+                            }}
+                            animate={isInView ? {
+                                x: `${index * 100}%`,
+                                y: 0,
+                                transition: {
+                                    duration: 0.8,
+                                    delay: index * 0.2,
+                                    ease: "easeOut"
+                                }
+                            } : {}}
                         >
-                            <div className="relative h-48">
-                                <Image
-                                    src={tool.image}
-                                    alt={tool.name}
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                            <div className="p-4">
-                                <h3 className="text-xl font-semibold mb-2 text-white">{tool.name}</h3>
-                                <p className="text-gray-300 text-sm mb-4 line-clamp-2">
-                                    {tool.description}
-                                </p>
-                                <div className="flex justify-between items-center text-sm text-gray-300">
-                                    <span>Mới thêm: {new Date(tool.createdAt).toLocaleDateString('vi-VN')}</span>
-                                    <button className="bg-zinc-800 text-white px-4 py-2 rounded hover:bg-zinc-700 transition-colors">
-                                        Xem chi tiết
-                                    </button>
+                            <div className="overflow-hidden mx-2">
+                                <div className="relative h-56 rounded-xl overflow-hidden">
+                                    <Image
+                                        src={tool.image}
+                                        alt={tool.name}
+                                        fill
+                                        className="object-cover"
+                                    />
                                 </div>
+                                <motion.h3
+                                    className="text-xl font-semibold text-white text-center mt-6"
+                                    initial={{ opacity: 0 }}
+                                    animate={isInView ? {
+                                        opacity: 1,
+                                        transition: {
+                                            duration: 0.3,
+                                            delay: 1.6 // Đợi animation chính hoàn thành (0.8s + 0.2s * 4)
+                                        }
+                                    } : {}}
+                                >
+                                    {tool.name}
+                                </motion.h3>
                             </div>
                         </motion.div>
                     ))}
+                </div>
+                <div className="flex justify-center mt-2 mb-16 gap-20">
+                    <div
+                        className={`w-16 h-16 md:w-20 md:h-20 flex items-center justify-center cursor-pointer 
+                        hover:bg-white group border-2 border-white rounded-lg transition-all duration-300 
+                        ${currentPage === 1 ? 'opacity-50' : ''}`}
+                        onClick={() => currentPage !== 1 && prevSlide()}
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={2}
+                            stroke="currentColor"
+                            className="w-8 h-8 text-white group-hover:text-black"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M15 19l-7-7 7-7"
+                            />
+                        </svg>
+                    </div>
+
+                    <div
+                        className={`w-16 h-16 md:w-20 md:h-20 flex items-center justify-center cursor-pointer 
+                        hover:bg-white group border-2 border-white rounded-lg transition-all duration-300 
+                        ${currentPage === totalPages ? 'opacity-50' : ''}`}
+                        onClick={() => currentPage !== totalPages && nextSlide()}
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={2}
+                            stroke="currentColor"
+                            className="w-8 h-8 text-white group-hover:text-black"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M9 5l7 7-7 7"
+                            />
+                        </svg>
+                    </div>
                 </div>
             </motion.div>
             <Footer />

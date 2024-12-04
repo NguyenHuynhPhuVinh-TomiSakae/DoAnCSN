@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { SelectedToolDetail } from './SelectedToolDetail';
 import anime from 'animejs';
+import NewAITools from './NewAITools';
 
 const beVietnamPro = Be_Vietnam_Pro({
     subsets: ['vietnamese'],
@@ -308,6 +309,7 @@ export default function AIRanking() {
                     )
                 }
             </div >
+            {!selectedTool && <NewAITools />}
         </motion.div >
     );
 } 

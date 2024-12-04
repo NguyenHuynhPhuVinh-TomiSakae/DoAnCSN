@@ -8,7 +8,6 @@ import { useInView } from 'framer-motion';
 import anime from 'animejs';
 import { SelectedToolDetail } from './SelectedToolDetail';
 import AIRanking from './AIRanking';
-import NewAITools from './NewAITools';
 
 const beVietnamPro = Be_Vietnam_Pro({
     subsets: ['vietnamese'],
@@ -437,7 +436,6 @@ export default function ShowAIIntro() {
                     ))}
                 </div>
                 {!selectedTool && <AIRanking />}
-                {!selectedTool && <NewAITools />}
             </div>
         </motion.div>
     );

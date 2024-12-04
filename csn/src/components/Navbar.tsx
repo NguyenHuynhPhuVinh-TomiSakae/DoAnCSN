@@ -153,7 +153,9 @@ const Navbar = () => {
 
     return (
         <motion.nav
-            className={`fixed top-0 left-0 right-0 h-16 z-50 flex justify-between items-center px-8 transition-colors duration-300 ${isDark || isInShowAIIntro || isInNewAITools
+            className={`fixed top-0 left-0 right-0 h-16 z-50 flex justify-between items-center px-8 transition-colors duration-300 ${isInNewAITools
+                ? 'bg-black'
+                : isDark || isInShowAIIntro
                     ? isInAIRanking
                         ? 'bg-white'
                         : 'bg-black'
@@ -170,16 +172,18 @@ const Navbar = () => {
                 delay: isLoading ? 0 : 2
             }}
         >
-            <div className={`${beVietnamPro.className} font-bold text-xl transition-colors duration-300 ${isDark || isInShowAIIntro || isInNewAITools
+            <div className={`${beVietnamPro.className} font-bold text-xl transition-colors duration-300 ${isInNewAITools
+                ? 'text-white'
+                : isDark || isInShowAIIntro
                     ? isInAIRanking
                         ? 'text-black'
                         : 'text-white'
                     : 'text-black'
                 }`}>
-                {isInAIRanking
-                    ? 'XẾP HẠNG'
-                    : isInNewAITools
-                        ? 'MỚI NHẤT'
+                {isInNewAITools
+                    ? 'MỚI NHẤT'
+                    : isInAIRanking
+                        ? 'XẾP HẠNG'
                         : isIntroView
                             ? 'PHÂN LOẠI'
                             : 'TRANG CHỦ'}
@@ -188,9 +192,11 @@ const Navbar = () => {
             {isIntroView && (
                 <div className="fixed left-1/2 -translate-x-1/2" style={{ top: '4px', zIndex: 60 }}>
                     <motion.div
-                        className={`h-[3.5em] border-2 overflow-hidden flex items-center transition-colors duration-300 ${isInAIRanking
-                            ? 'border-black bg-white'
-                            : 'border-white bg-black'
+                        className={`h-[3.5em] border-2 overflow-hidden flex items-center transition-colors duration-300 ${isInNewAITools
+                            ? 'border-white bg-black'
+                            : isInAIRanking
+                                ? 'border-black bg-white'
+                                : 'border-white bg-black'
                             }`}
                         initial={{ width: '5em' }}
                         animate={{ width: '35em' }}
@@ -198,9 +204,11 @@ const Navbar = () => {
                     >
                         <input
                             type="text"
-                            className={`w-full px-4 py-1 focus:outline-none text-sm transition-colors duration-300 ${isInAIRanking
-                                ? 'bg-white text-black placeholder-gray-600'
-                                : 'bg-black text-white placeholder-gray-400'
+                            className={`w-full px-4 py-1 focus:outline-none text-sm transition-colors duration-300 ${isInNewAITools
+                                ? 'bg-black text-white placeholder-gray-400'
+                                : isInAIRanking
+                                    ? 'bg-white text-black placeholder-gray-600'
+                                    : 'bg-black text-white placeholder-gray-400'
                                 }`}
                         />
                         <div className="search-icon ml-auto pr-4">
@@ -210,7 +218,11 @@ const Navbar = () => {
                                 viewBox="0 0 24 24"
                                 strokeWidth={2}
                                 stroke="currentColor"
-                                className={`w-6 h-6 transition-colors duration-300 ${isInAIRanking ? 'text-black' : 'text-white'
+                                className={`w-6 h-6 transition-colors duration-300 ${isInNewAITools
+                                    ? 'text-white'
+                                    : isInAIRanking
+                                        ? 'text-black'
+                                        : 'text-white'
                                     }`}
                             >
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -221,11 +233,13 @@ const Navbar = () => {
             )}
 
             <div className="flex items-center relative">
-                <FaRobot className={`w-8 h-8 transition-colors duration-300 ${isDark || isInShowAIIntro
-                    ? isInAIRanking
-                        ? 'text-black'
-                        : 'text-white'
-                    : 'text-black'
+                <FaRobot className={`w-8 h-8 transition-colors duration-300 ${isInNewAITools
+                    ? 'text-white'
+                    : isDark || isInShowAIIntro
+                        ? isInAIRanking
+                            ? 'text-black'
+                            : 'text-white'
+                        : 'text-black'
                     }`} />
                 <div ref={lineRef} className={`absolute top-full left-1/2 transform -translate-x-1/2 w-0.5 transition-colors duration-300 ${isDark || isInShowAIIntro
                     ? isInAIRanking
