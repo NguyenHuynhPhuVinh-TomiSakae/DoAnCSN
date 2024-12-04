@@ -6,7 +6,7 @@ import { useLoading } from '@/context/LoadingContext';
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 const beVietnamPro = Be_Vietnam_Pro({
     subsets: ['vietnamese'],
@@ -33,12 +33,17 @@ const Navbar = () => {
     const [isNavHovered, setIsNavHovered] = useState(false);
     const pathname = usePathname();
     const isSearchPage = pathname.includes('/search');
+    const router = useRouter();
+    const [hoverText, setHoverText] = useState(false);
+    const [hasScrolled, setHasScrolled] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
             if (isSearchPage) return;
 
             const scrollPosition = window.scrollY;
+            setHasScrolled(scrollPosition > 0);
+
             const threshold = window.innerHeight * 0.8;
             const newIsDark = scrollPosition > threshold;
 
@@ -191,7 +196,7 @@ const Navbar = () => {
                 ease: "easeOut",
                 delay: isLoading ? 0 : 2
             }}
-            onMouseEnter={() => setIsNavHovered(true)}
+            onMouseEnter={() => hasScrolled && setIsNavHovered(true)}
             onMouseLeave={() => {
                 setIsNavHovered(false);
                 setHoveredTitle(null);
@@ -205,11 +210,11 @@ const Navbar = () => {
                             ? 'text-black'
                             : 'text-white'
                         : 'text-black'
-                    } ${(hoveredTitle === 'hover' && isNavHovered && !isSearchPage) ? '' : 'font-bold'}`}
-                onMouseEnter={() => setHoveredTitle('hover')}
+                    } ${(hoveredTitle === 'hover' && isNavHovered && !isSearchPage && hasScrolled) ? '' : 'font-bold'}`}
+                onMouseEnter={() => hasScrolled && setHoveredTitle('hover')}
             >
                 <AnimatePresence mode="wait">
-                    {(hoveredTitle === 'hover' && isNavHovered && !isSearchPage) ? (
+                    {(hoveredTitle === 'hover' && isNavHovered && !isSearchPage && hasScrolled) ? (
                         <motion.div
                             className="flex items-center gap-4"
                             initial={{ opacity: 0, x: 0 }}
@@ -306,16 +311,35 @@ const Navbar = () => {
                             exit={{ opacity: 0, x: 0 }}
                             transition={{ duration: 0.3, ease: "easeInOut" }}
                             key="menu-collapsed"
+                            className={`cursor-pointer group relative px-3 py-1 ${isSearchPage ? 'hover:bg-black hover:text-white' : ''}`}
+                            onClick={() => {
+                                if (isSearchPage) {
+                                    router.push('/');
+                                }
+                            }}
                         >
-                            {isSearchPage
-                                ? 'TÌM KIẾM'
-                                : isInNewAITools
+                            {isSearchPage ? (
+                                <div
+                                    className="cursor-pointer relative px-3 py-1 hover:bg-black hover:text-white"
+                                    onClick={() => router.push('/')}
+                                    onMouseEnter={() => setHoverText(true)}
+                                    onMouseLeave={() => setHoverText(false)}
+                                >
+                                    <div className="relative">
+                                        <span>
+                                            {hoverText ? 'QUAY LẠI' : 'TÌM KIẾM'}
+                                        </span>
+                                    </div>
+                                </div>
+                            ) : (
+                                isInNewAITools
                                     ? 'MỚI NHẤT'
                                     : isInAIRanking
                                         ? 'XẾP HẠNG'
                                         : isIntroView
                                             ? 'PHÂN LOẠI'
-                                            : 'TRANG CHỦ'}
+                                            : 'TRANG CHỦ'
+                            )}
                         </motion.div>
                     )}
                 </AnimatePresence>
