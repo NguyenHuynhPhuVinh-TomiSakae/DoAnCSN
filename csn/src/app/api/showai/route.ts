@@ -31,7 +31,7 @@ async function connectToDatabase(): Promise<Db> {
     return database;
 }
 
-// Hàm helper để tạo response với CORS headers
+// Hàm helper đ tạo response với CORS headers
 function createCorsResponse(data: unknown, status = 200) {
     const response = NextResponse.json(data, { status });
     response.headers.set('Access-Control-Allow-Origin', '*');
@@ -51,8 +51,109 @@ async function clearCache() {
     }
 }
 
+// Định nghĩa từ khóa cho mỗi tab
+const TAB_KEYWORDS: Record<string, string[]> = {
+    'Video': [
+        'tạo video',
+        'chỉnh sửa video',
+        'biên tập video',
+        'tạo video AI',
+        'video editing',
+        'video generation',
+        'video creator'
+    ],
+    'Image': [
+        'tạo ảnh',
+        'chỉnh sửa ảnh',
+        'xử lý ảnh',
+        'thiết kế hình ảnh',
+        'image generation',
+        'image editing'
+    ],
+    'Chat': [
+        'chatbot',
+        'trợ lý ảo',
+        'AI assistant',
+        'chat AI',
+        'virtual assistant',
+        'tư vấn AI'
+    ],
+    'Data': [
+        'xử lý dữ liệu',
+        'phân tích dữ liệu',
+        'data analysis',
+        'big data',
+        'data processing',
+        'data visualization',
+        'thống kê dữ liệu'
+    ],
+    'Code': [
+        'hỗ trợ lập trình',
+        'code assistant',
+        'programming help',
+        'debug code',
+        'code generation',
+        'coding AI',
+        'development tools'
+    ],
+    'App': [
+        'ứng dụng AI',
+        'AI tools',
+        'ứng dụng thông minh',
+        'smart apps',
+        'AI applications',
+        'công cụ AI',
+        'phần mềm AI'
+    ],
+    'Web': [
+        'công cụ web',
+        'web tools',
+        'web development',
+        'web automation',
+        'web services',
+        'online tools',
+        'công cụ trực tuyến'
+    ]
+};
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
+    const initializeKeywords = searchParams.get('initializeKeywords');
+
+    if (initializeKeywords === 'true') {
+        try {
+            const db = await connectToDatabase();
+            const aiToolsCollection = db.collection('data_web_ai');
+
+            // Lặp qua từng tab và từ khóa
+            for (const [tab, keywords] of Object.entries(TAB_KEYWORDS)) {
+                // Tìm tất cả công cụ AI có tag tương ứng
+                const updateResult = await aiToolsCollection.updateMany(
+                    { tags: { $regex: tab, $options: 'i' } }, // Tìm các công cụ có tag phù hợp
+                    {
+                        $addToSet: {
+                            keywords: {
+                                $each: keywords
+                            }
+                        }
+                    }
+                );
+
+                console.log(`Đã cập nhật ${updateResult.modifiedCount} công cụ cho tab ${tab}`);
+            }
+
+            return createCorsResponse({
+                success: true,
+                message: 'Đã thêm keywords vào tất cả công cụ AI thành công'
+            });
+
+        } catch (error) {
+            console.error('Lỗi khi thêm keywords:', error);
+            return createCorsResponse({
+                error: 'Đã xảy ra lỗi khi thêm keywords vào công cụ AI'
+            }, 500);
+        }
+    }
 
     // Thêm tham số mới để xóa cache
     const clearCache = searchParams.get('clearCache');
@@ -105,12 +206,35 @@ export async function GET(request: Request) {
         }
 
         if (searchKeyword) {
-            query.$or = [
-                { name: { $regex: searchKeyword, $options: 'i' } },
-                { description: { $elemMatch: { $regex: searchKeyword, $options: 'i' } } },
-                { keyFeatures: { $elemMatch: { $regex: searchKeyword, $options: 'i' } } }
-            ];
+            // Lấy documents match với regex
+            const regexDocs = await collection.find({
+                $or: [
+                    { name: { $regex: searchKeyword, $options: 'i' } },
+                    { description: { $regex: searchKeyword, $options: 'i' } },
+                    { keyFeatures: { $regex: searchKeyword, $options: 'i' } }
+                ]
+            }).toArray();
+
+            // Lấy documents match với keywords
+            const allDocs = await collection.find().toArray();
+            const keywordDocs = allDocs.filter(doc =>
+                doc.keywords?.some((keyword: string) =>
+                    searchKeyword.toLowerCase().includes(keyword.toLowerCase())
+                )
+            );
+
+            // Kết hợp và loại bỏ trùng lặp
+            const combinedDocs = [...regexDocs, ...keywordDocs];
+            const uniqueDocs = Array.from(new Set(combinedDocs.map(doc => doc.id)))
+                .map(id => combinedDocs.find(doc => doc.id === id));
+
+            return createCorsResponse({
+                data: uniqueDocs,
+                pagination: null,
+                tags: await collection.distinct('tags')
+            });
         }
+
 
         if (tag) {
             query.tags = { $elemMatch: { $regex: tag, $options: 'i' } };
