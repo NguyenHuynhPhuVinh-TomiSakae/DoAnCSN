@@ -1,7 +1,9 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Be_Vietnam_Pro, Orbitron } from 'next/font/google';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
+import { useInView } from 'framer-motion';
 
 const beVietnamPro = Be_Vietnam_Pro({
     subsets: ['vietnamese'],
@@ -30,6 +32,36 @@ export default function AIRanking() {
     const [heartTools, setHeartTools] = useState<Tool[]>([]);
     const [evaluationTools, setEvaluationTools] = useState<Tool[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [selectedTool, setSelectedTool] = useState<string | null>(null);
+
+    // Refs cho từng phần
+    const titleRef = useRef(null);
+
+    // useInView cho từng phần
+    const isTitleInView = useInView(titleRef, {
+        once: true,
+        amount: 0.5
+    });
+
+    const lineVariants = {
+        hidden: { width: 0 },
+        visible: {
+            width: "100%",
+            transition: { duration: 0.8, ease: "easeInOut" }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: (i: number) => ({
+            opacity: 1,
+            y: 0,
+            transition: {
+                delay: i * 0.1,
+                duration: 0.5
+            }
+        })
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -57,134 +89,186 @@ export default function AIRanking() {
         fetchData();
     }, []);
 
+    const columnConfig = [
+        {
+            tools: viewTools,
+            title: "Lượt xem cao nhất",
+            icon: (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                    <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                </svg>
+            )
+        },
+        {
+            tools: heartTools,
+            title: "Yêu thích nhiều nhất",
+            icon: (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                </svg>
+            )
+        },
+        {
+            tools: evaluationTools,
+            title: "Đánh giá cao nhất",
+            icon: (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+            )
+        }
+    ];
+
     return (
-        <div id="ai-ranking" className={`min-h-screen bg-white text-black ${beVietnamPro.className} mt-12`}>
+        <motion.div
+            className={`min-h-screen bg-white text-black ${beVietnamPro.className} mt-12`}
+        >
             <div className="h-full py-24 px-8">
-                <div className="text-center mb-24">
+                {/* Title section */}
+                <motion.div
+                    ref={titleRef}
+                    className="text-center mb-24"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={isTitleInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+                    transition={{ duration: 0.8 }}
+                >
                     <h1 className={`${orbitron.className} text-6xl font-bold mb-8 tracking-wider text-black`}>
                         Top Công Cụ AI
                     </h1>
                     <p className="text-2xl text-black max-w-4xl mx-auto leading-relaxed font-medium">
                         Khám phá những công cụ AI được yêu thích nhất dựa trên lượt xem, đánh giá và tương tác từ cộng đồng người dùng.
                     </p>
-                </div>
+                </motion.div>
 
-                {isLoading ? (
-                    <div className="text-center">Đang tải...</div>
-                ) : (
-                    <div className="grid grid-cols-3 gap-8 max-w-7xl mx-auto">
-                        {/* Cột Lượt xem */}
-                        <div className="flex flex-col">
-                            <h2 className="text-2xl font-bold text-center mb-6 pb-2 border-b-2 border-black">
-                                <div className="flex items-center justify-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                                        <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                                    </svg>
-                                    Lượt xem cao nhất
-                                </div>
-                            </h2>
-                            {viewTools.map((tool, index) => (
-                                <div key={`view-${tool.id}`} className="flex flex-col items-center mb-6">
-                                    <div className={`${orbitron.className} text-xl font-bold mb-2`}>
-                                        #{index + 1}
-                                    </div>
-                                    <div className="relative w-32 h-32 mb-2">
-                                        <Image
-                                            src={tool.image || '/placeholder.jpg'}
-                                            alt={tool.name}
-                                            fill
-                                            className="object-cover rounded-lg"
+                {
+                    !isLoading && (
+                        <motion.div className="relative max-w-7xl mx-auto">
+                            {/* Số thứ tự và đường kẻ ngang */}
+                            <div
+                                className="absolute left-[-30px] top-[65px] w-12"
+                                style={{ display: selectedTool ? 'none' : 'block' }}
+                            >
+                                {[...Array(9)].map((_, index) => (
+                                    <div key={index} className={`${orbitron.className} text-xl font-bold h-[120px] relative`}>
+                                        <motion.div
+                                            className="absolute left-[-20px] right-[-20px] top-1/2 border-b-2 border-gray-200 -z-10"
+                                            variants={lineVariants}
+                                            initial="hidden"
+                                            whileInView="visible"
+                                            viewport={{ once: true, amount: 0.3 }}
                                         />
+                                        <motion.span
+                                            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-1"
+                                            initial={{ opacity: 0 }}
+                                            whileInView={{ opacity: 1 }}
+                                            viewport={{ once: true }}
+                                            transition={{ delay: 0.4 }}
+                                        >
+                                            #{index + 1}
+                                        </motion.span>
                                     </div>
-                                    <div className="text-center">
-                                        <div className="font-bold">{tool.name}</div>
-                                        <div className="flex items-center justify-center gap-2 text-gray-600">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                                                <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                                            </svg>
-                                            {tool.view.toLocaleString()}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
 
-                        {/* Cột Yêu thích */}
-                        <div className="flex flex-col">
-                            <h2 className="text-2xl font-bold text-center mb-6 pb-2 border-b-2 border-black">
-                                <div className="flex items-center justify-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
-                                    </svg>
-                                    Yêu thích nhiều nhất
-                                </div>
-                            </h2>
-                            {heartTools.map((tool, index) => (
-                                <div key={`heart-${tool.id}`} className="flex flex-col items-center mb-6">
-                                    <div className={`${orbitron.className} text-xl font-bold mb-2`}>
-                                        #{index + 1}
-                                    </div>
-                                    <div className="relative w-32 h-32 mb-2">
-                                        <Image
-                                            src={tool.image || '/placeholder.jpg'}
-                                            alt={tool.name}
-                                            fill
-                                            className="object-cover rounded-lg"
-                                        />
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="font-bold">{tool.name}</div>
-                                        <div className="flex items-center justify-center gap-2 text-gray-600">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
-                                            </svg>
-                                            {tool.heart.toLocaleString()}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                            {/* Grid chính */}
+                            {selectedTool ? (
+                                // Hiển thị chi tiết một tool
+                                <div className="pl-12">
+                                    {columnConfig.map(column => {
+                                        const tool = column.tools.find(t => t.id === selectedTool);
+                                        if (!tool) return null;
 
-                        {/* Cột Đánh giá */}
-                        <div className="flex flex-col">
-                            <h2 className="text-2xl font-bold text-center mb-6 pb-2 border-b-2 border-black">
-                                <div className="flex items-center justify-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                    </svg>
-                                    Đánh giá cao nhất
+                                        return (
+                                            <motion.div
+                                                key={tool.id}
+                                                className="flex items-center gap-4 h-[120px] -mx-8 px-8 group relative hover:bg-black transition-all duration-300"
+                                                variants={itemVariants}
+                                                initial="hidden"
+                                                whileInView="visible"
+                                                viewport={{ once: true, amount: 0.3 }}
+                                            >
+                                                <div className="flex items-center gap-4 w-full">
+                                                    <div className="relative w-20 h-20">
+                                                        <Image
+                                                            src={tool.image || '/placeholder.jpg'}
+                                                            alt={tool.name}
+                                                            fill
+                                                            className="object-cover rounded-lg"
+                                                        />
+                                                    </div>
+                                                    <div className="font-bold group-hover:text-white transition-colors duration-300">
+                                                        {tool.name}
+                                                    </div>
+                                                    <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-4">
+                                                        <button
+                                                            className="px-4 py-2 border border-white text-white rounded hover:bg-white hover:text-black transition-colors"
+                                                            onClick={() => setSelectedTool(null)}
+                                                        >
+                                                            Đóng
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        );
+                                    }).filter(Boolean)[0]} {/* Chỉ lấy phần tử đầu tiên tìm thấy */}
                                 </div>
-                            </h2>
-                            {evaluationTools.map((tool, index) => (
-                                <div key={`eval-${tool.id}`} className="flex flex-col items-center mb-6">
-                                    <div className={`${orbitron.className} text-xl font-bold mb-2`}>
-                                        #{index + 1}
-                                    </div>
-                                    <div className="relative w-32 h-32 mb-2">
-                                        <Image
-                                            src={tool.image || '/placeholder.jpg'}
-                                            alt={tool.name}
-                                            fill
-                                            className="object-cover rounded-lg"
-                                        />
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="font-bold">{tool.name}</div>
-                                        <div className="flex items-center justify-center gap-2 text-gray-600">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                            </svg>
-                                            {tool.evaluation.toFixed(1)}
+                            ) : (
+                                // Hiển thị grid bình thường
+                                <div className="grid grid-cols-3 gap-8 pl-12 divide-x-2 divide-black">
+                                    {columnConfig.map((column, colIndex) => (
+                                        <div key={colIndex} className={`flex flex-col ${colIndex > 0 ? 'pl-8' : ''}`}>
+                                            <motion.h2
+                                                className="text-2xl font-bold flex items-center justify-center text-center mb-6 pb-2 border-b-2 border-black"
+                                                initial={{ width: 0 }}
+                                                whileInView={{ width: "100%" }}
+                                                viewport={{ once: true }}
+                                                transition={{ duration: 0.8 }}
+                                            >
+                                                {column.icon}
+                                                {column.title}
+                                            </motion.h2>
+                                            {column.tools.map((tool, index) => (
+                                                <motion.div
+                                                    key={tool.id}
+                                                    className="flex items-center gap-4 h-[120px] border-b-2 border-black -mx-8 px-8 group relative hover:bg-black transition-all duration-300"
+                                                    variants={itemVariants}
+                                                    initial="hidden"
+                                                    whileInView="visible"
+                                                    viewport={{ once: true, amount: 0.3 }}
+                                                    custom={index}
+                                                >
+                                                    <div className="flex items-center gap-4 w-full">
+                                                        <div className="relative w-20 h-20">
+                                                            <Image
+                                                                src={tool.image || '/placeholder.jpg'}
+                                                                alt={tool.name}
+                                                                fill
+                                                                className="object-cover rounded-lg"
+                                                            />
+                                                        </div>
+                                                        <div className="font-bold group-hover:text-white transition-colors duration-300">
+                                                            {tool.name}
+                                                        </div>
+                                                        <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-4">
+                                                            <button
+                                                                className="px-4 py-2 border border-white text-white rounded hover:bg-white hover:text-black transition-colors"
+                                                                onClick={() => setSelectedTool(tool.id)}
+                                                            >
+                                                                Chi tiết
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+                                            ))}
                                         </div>
-                                    </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-            </div>
-        </div>
+                            )}
+                        </motion.div>
+                    )
+                }
+            </div >
+        </motion.div >
     );
 } 

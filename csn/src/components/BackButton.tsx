@@ -2,13 +2,14 @@ import { motion } from 'framer-motion';
 
 interface BackButtonProps {
     onClick: () => void;
+    color?: 'white' | 'black';
 }
 
-export function BackButton({ onClick }: BackButtonProps) {
+export function BackButton({ onClick, color = 'white' }: BackButtonProps) {
     return (
         <motion.button
             onClick={onClick}
-            className="flex items-center gap-2 text-white hover:text-white transition-colors mb-4"
+            className={`flex items-center gap-2 text-${color} hover:text-${color} transition-colors mb-4`}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
@@ -20,7 +21,7 @@ export function BackButton({ onClick }: BackButtonProps) {
                 className="h-6 w-6"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke="white"
+                stroke={color}
             >
                 <path
                     strokeLinecap="round"
