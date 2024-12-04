@@ -455,6 +455,8 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
 }), { ssr: false });
 
 // Wrapper component
-export default function LoadingWrapper(props: LoadingProps) {
-  return <Loading {...props} />;
+export default function LoadingWrapper() {
+  const { setIsLoading } = useLoading();
+
+  return <Loading onLoadComplete={() => setIsLoading(false)} />;
 }
