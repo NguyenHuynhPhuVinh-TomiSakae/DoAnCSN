@@ -9,9 +9,9 @@ const beVietnamPro = Be_Vietnam_Pro({
 
 export default function Footer() {
     return (
-        <footer className={`bg-white text-black py-8 ${beVietnamPro.className}`}>
+        <footer className={`bg-black text-white py-8 mt-8 ${beVietnamPro.className}`}>
             <div className="container mx-auto px-8">
-                <div className="text-center text-gray-600">
+                <div className="text-center text-white">
                     <p>&copy; {new Date().getFullYear()} ShowAI. Tất cả quyền được bảo lưu.</p>
                 </div>
             </div>
