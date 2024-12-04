@@ -439,7 +439,7 @@ export default function SearchPage() {
                                                 </div>
                                             </div>
                                             {!isGridLayout && (
-                                                <p className="text-gray-600 mt-2 transition-all duration-300 line-clamp-2 overflow-hidden"
+                                                <p className="text-black mt-2 transition-all duration-300 line-clamp-2 overflow-hidden"
                                                     style={{
                                                         fontSize: '1.25rem',
                                                         display: '-webkit-box',
