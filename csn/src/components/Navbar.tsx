@@ -1,7 +1,7 @@
 'use client';
 import { FaRobot } from "react-icons/fa";
 import { Be_Vietnam_Pro } from 'next/font/google';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLoading } from '@/context/LoadingContext';
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
@@ -28,6 +28,9 @@ const Navbar = () => {
     const [isInShowAIIntro, setIsInShowAIIntro] = useState(false);
     const [isInAIRanking, setIsInAIRanking] = useState(false);
     const [isInNewAITools, setIsInNewAITools] = useState(false);
+    const [hoveredTitle, setHoveredTitle] = useState<string | null>(null);
+    const [isNavHovered, setIsNavHovered] = useState(false);
+
 
     useEffect(() => {
         const handleScroll = () => {
@@ -151,6 +154,13 @@ const Navbar = () => {
         }
     }, [isLoading, shouldAnimate, isIntroView]);
 
+    const scrollToSection = (sectionId: string) => {
+        const element = document.querySelector(sectionId);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
     return (
         <motion.nav
             className={`fixed top-0 left-0 right-0 h-16 z-50 flex justify-between items-center px-8 transition-colors duration-300 ${isInNewAITools
@@ -171,26 +181,141 @@ const Navbar = () => {
                 ease: "easeOut",
                 delay: isLoading ? 0 : 2
             }}
+            onMouseEnter={() => setIsNavHovered(true)}
+            onMouseLeave={() => {
+                setIsNavHovered(false);
+                setHoveredTitle(null);
+            }}
         >
-            <div className={`${beVietnamPro.className} font-bold text-xl transition-colors duration-300 ${isInNewAITools
-                ? 'text-white'
-                : isDark || isInShowAIIntro
-                    ? isInAIRanking
-                        ? 'text-black'
-                        : 'text-white'
-                    : 'text-black'
-                }`}>
-                {isInNewAITools
-                    ? 'MỚI NHẤT'
-                    : isInAIRanking
-                        ? 'XẾP HẠNG'
-                        : isIntroView
-                            ? 'PHÂN LOẠI'
-                            : 'TRANG CHỦ'}
+            <div
+                className={`${beVietnamPro.className} text-xl transition-colors duration-300 ${isInNewAITools
+                    ? 'text-white'
+                    : isDark || isInShowAIIntro
+                        ? isInAIRanking
+                            ? 'text-black'
+                            : 'text-white'
+                        : 'text-black'
+                    } ${(hoveredTitle === 'hover' && isNavHovered) ? '' : 'font-bold'}`}
+                onMouseEnter={() => setHoveredTitle('hover')}
+            >
+                <AnimatePresence mode="wait">
+                    {(hoveredTitle === 'hover' && isNavHovered) ? (
+                        <motion.div
+                            className="flex items-center gap-4"
+                            initial={{ opacity: 0, x: 0 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                            transition={{
+                                duration: 0.3,
+                                staggerChildren: 0,
+                                ease: "easeInOut"
+                            }}
+                            key="menu-expanded"
+                        >
+                            <motion.span
+                                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                                className={`cursor-pointer px-3 py-1
+                                    ${!isIntroView && !isInAIRanking && !isInNewAITools ? 'font-extrabold' : ''}
+                                    ${isInNewAITools
+                                        ? 'hover:bg-white hover:text-black'
+                                        : isDark || isInShowAIIntro
+                                            ? isInAIRanking
+                                                ? 'hover:bg-black hover:text-white'
+                                                : 'hover:bg-white hover:text-black'
+                                            : 'hover:bg-black hover:text-white'
+                                    }`}
+                                initial={{ opacity: 0, x: 0 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                transition={{ duration: 0.3 }}
+                            >
+                                TRANG CHỦ
+                            </motion.span>
+                            <motion.span
+                                onClick={() => scrollToSection('.showai-intro')}
+                                className={`cursor-pointer px-3 py-1
+                                    ${isIntroView && !isInAIRanking && !isInNewAITools ? 'font-extrabold' : ''}
+                                    ${isInNewAITools
+                                        ? 'hover:bg-white hover:text-black'
+                                        : isDark || isInShowAIIntro
+                                            ? isInAIRanking
+                                                ? 'hover:bg-black hover:text-white'
+                                                : 'hover:bg-white hover:text-black'
+                                            : 'hover:bg-black hover:text-white'
+                                    }`}
+                                initial={{ opacity: 0, x: 0 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                transition={{ duration: 0.3, delay: 0.1 }}
+                            >
+                                PHÂN LOẠI
+                            </motion.span>
+                            <motion.span
+                                onClick={() => scrollToSection('#ai-ranking')}
+                                className={`cursor-pointer px-3 py-1
+                                    ${isInAIRanking && !isInNewAITools ? 'font-extrabold' : ''}
+                                    ${isInNewAITools
+                                        ? 'hover:bg-white hover:text-black'
+                                        : isDark || isInShowAIIntro
+                                            ? isInAIRanking
+                                                ? 'hover:bg-black hover:text-white'
+                                                : 'hover:bg-white hover:text-black'
+                                            : 'hover:bg-black hover:text-white'
+                                    }`}
+                                initial={{ opacity: 0, x: 0 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                transition={{ duration: 0.3, delay: 0.2 }}
+                            >
+                                XẾP HẠNG
+                            </motion.span>
+                            <motion.span
+                                onClick={() => scrollToSection('#new-ai-tools')}
+                                className={`cursor-pointer px-3 py-1
+                                    ${isInNewAITools ? 'font-extrabold' : ''}
+                                    ${isInNewAITools
+                                        ? 'hover:bg-white hover:text-black'
+                                        : isDark || isInShowAIIntro
+                                            ? isInAIRanking
+                                                ? 'hover:bg-black hover:text-white'
+                                                : 'hover:bg-white hover:text-black'
+                                            : 'hover:bg-black hover:text-white'
+                                    }`}
+                                initial={{ opacity: 0, x: 0 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                transition={{ duration: 0.3, delay: 0.3 }}
+                            >
+                                MỚI NHẤT
+                            </motion.span>
+                        </motion.div>
+                    ) : (
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 0 }}
+                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                            key="menu-collapsed"
+                        >
+                            {isInNewAITools
+                                ? 'MỚI NHẤT'
+                                : isInAIRanking
+                                    ? 'XẾP HẠNG'
+                                    : isIntroView
+                                        ? 'PHÂN LOẠI'
+                                        : 'TRANG CHỦ'}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
 
             {isIntroView && (
-                <div className="fixed left-1/2 -translate-x-1/2" style={{ top: '4px', zIndex: 60 }}>
+                <div className="fixed left-1/2 -translate-x-1/2" style={{
+                    top: '4px',
+                    zIndex: 60,
+                    transform: `translateX(${(hoveredTitle === 'hover' && isNavHovered) ? '80px' : '-50%'})`,
+                    transition: 'transform 0.5s ease-out 0.2s'
+                }}>
                     <motion.div
                         className={`h-[3.5em] border-2 overflow-hidden flex items-center transition-colors duration-300 ${isInNewAITools
                             ? 'border-white bg-black'
