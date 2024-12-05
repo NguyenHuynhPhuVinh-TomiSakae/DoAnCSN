@@ -6,7 +6,7 @@ import { useLoading } from '@/context/LoadingContext';
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 const beVietnamPro = Be_Vietnam_Pro({
     subsets: ['vietnamese'],
@@ -39,6 +39,13 @@ const Navbar = () => {
     const [searchValue, setSearchValue] = useState('');
     const searchInputRef = useRef<HTMLInputElement>(null);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
+    const searchParams = useSearchParams();
+    const [isAiIcon, setIsAiIcon] = useState(false);
+
+    useEffect(() => {
+        const aiParam = searchParams.get('ai');
+        setIsAiIcon(aiParam === 'true');
+    }, [searchParams]);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -271,13 +278,16 @@ const Navbar = () => {
 
     return (
         <motion.nav
-            className={`fixed top-0 left-0 right-0 h-16 z-50 flex justify-between items-center px-8 transition-colors duration-300 ${isInNewAITools
-                ? 'bg-black'
-                : isDark || isInShowAIIntro
-                    ? isInAIRanking
-                        ? 'bg-white'
-                        : 'bg-black'
-                    : 'bg-white'
+            className={`fixed top-0 left-0 right-0 h-16 z-50 flex justify-between items-center px-8 transition-colors duration-300 
+                ${isAiIcon
+                    ? 'bg-black text-white'
+                    : isInNewAITools
+                        ? 'bg-black'
+                        : isDark || isInShowAIIntro
+                            ? isInAIRanking
+                                ? 'bg-white'
+                                : 'bg-black'
+                            : 'bg-white'
                 }`}
             initial={{ opacity: 0, y: -20 }}
             animate={{
@@ -295,15 +305,17 @@ const Navbar = () => {
                 setHoveredTitle(null);
             }}
         >
-            <div
-                className={`${beVietnamPro.className} text-xl transition-colors duration-300 ${isInNewAITools
+            <div className={`${beVietnamPro.className} text-xl transition-colors duration-300 
+                ${isAiIcon
                     ? 'text-white'
-                    : isDark || isInShowAIIntro
-                        ? isInAIRanking
-                            ? 'text-black'
-                            : 'text-white'
-                        : 'text-black'
-                    } ${(hoveredTitle === 'hover' && isNavHovered && !isSearchPage && hasScrolled) ? '' : 'font-bold'}`}
+                    : isInNewAITools
+                        ? 'text-white'
+                        : isDark || isInShowAIIntro
+                            ? isInAIRanking
+                                ? 'text-black'
+                                : 'text-white'
+                            : 'text-black'
+                } ${(hoveredTitle === 'hover' && isNavHovered && !isSearchPage && hasScrolled) ? '' : 'font-bold'}`}
                 onMouseEnter={() => hasScrolled && setHoveredTitle('hover')}
             >
                 <AnimatePresence mode="wait">
@@ -413,7 +425,11 @@ const Navbar = () => {
                         >
                             {isSearchPage ? (
                                 <div
-                                    className="cursor-pointer relative px-3 py-1 hover:bg-black hover:text-white"
+                                    className={`cursor-pointer relative px-3 py-1 
+                                        ${isAiIcon
+                                            ? 'hover:bg-white hover:text-black'  // Khi isAiIcon true
+                                            : 'hover:bg-black hover:text-white'  // Khi isAiIcon false
+                                        }`}
                                     onClick={() => router.push('/')}
                                     onMouseEnter={() => setHoverText(true)}
                                     onMouseLeave={() => setHoverText(false)}
@@ -495,13 +511,16 @@ const Navbar = () => {
             )}
 
             <div className="flex items-center relative">
-                <FaRobot className={`w-8 h-8 transition-colors duration-300 ${isInNewAITools
-                    ? 'text-white'
-                    : isDark || isInShowAIIntro
-                        ? isInAIRanking
-                            ? 'text-black'
-                            : 'text-white'
-                        : 'text-black'
+                <FaRobot className={`w-8 h-8 transition-colors duration-300 
+                    ${isAiIcon
+                        ? 'text-white'
+                        : isInNewAITools
+                            ? 'text-white'
+                            : isDark || isInShowAIIntro
+                                ? isInAIRanking
+                                    ? 'text-black'
+                                    : 'text-white'
+                                : 'text-black'
                     }`} />
                 {!isSearchPage && (
                     <div ref={lineRef} className={`absolute top-full left-1/2 transform -translate-x-1/2 w-0.5 transition-colors duration-300 ${isDark || isInShowAIIntro

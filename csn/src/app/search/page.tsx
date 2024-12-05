@@ -227,13 +227,18 @@ export default function SearchPage() {
 
     const handleIconClick = () => {
         setIsAiIcon(!isAiIcon);
+        const currentParams = new URLSearchParams(window.location.search);
+        const currentQuery = currentParams.get('q');
+
+        const newUrl = `/search?q=${currentQuery || ''}&ai=${!isAiIcon}`;
+        router.push(newUrl, { scroll: false });
     };
 
     return (
-        <div className={`min-h-screen bg-white ${beVietnamPro.className}`}>
-            <div className="mx-auto mt-24 w-full max-w-2xl relative">
+        <div className={`min-h-screen transition-all duration-300 ease-in-out ${isAiIcon ? 'bg-black' : 'bg-white'} ${beVietnamPro.className}`}>
+            <div className={`mx-auto pt-24 w-full max-w-2xl relative transition-colors duration-300 ease-in-out ${isAiIcon ? 'text-white' : 'text-black'}`}>
                 <motion.div
-                    className="h-[5em] border-2 border-black rounded-full overflow-hidden flex items-center relative bg-white mx-auto"
+                    className={`h-[5em] border-2 transition-all duration-300 ease-in-out ${isAiIcon ? 'border-white bg-black' : 'border-black bg-white'} rounded-full overflow-hidden flex items-center relative mx-auto`}
                     initial={{ width: '5em' }}
                     animate={{ width: '100%' }}
                     transition={{ duration: 1, ease: "easeOut" }}
@@ -245,11 +250,11 @@ export default function SearchPage() {
                             onChange={(e) => setSearchValue(e.target.value)}
                             onKeyPress={handleKeyPress}
                             placeholder={query || "Tìm kiếm công cụ AI..."}
-                            className="w-full bg-transparent text-3xl font-medium outline-none placeholder:text-black"
+                            className={`w-full bg-transparent text-3xl font-medium outline-none transition-colors duration-300 ease-in-out ${isAiIcon ? 'text-white placeholder:text-white' : 'text-black placeholder:text-black'}`}
                             autoFocus
                         />
                         <div
-                            className="search-icon ml-auto cursor-pointer"
+                            className={`search-icon ml-auto cursor-pointer ${isAiIcon ? 'text-white' : 'text-black'}`}
                             onClick={handleSearch}
                         >
                             <svg
@@ -266,12 +271,16 @@ export default function SearchPage() {
                     </div>
                 </motion.div>
 
-                <div className="absolute right-[-16rem] top-1/2 -translate-y-1/2 flex gap-2">
+                <div className="absolute pt-24 right-[-16rem] top-1/2 -translate-y-1/2 flex gap-2">
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.5 }}
-                        className={`w-12 h-12 flex items-center justify-center cursor-pointer rounded-full hover:bg-black hover:text-white px-2 py-2 bg-white text-black`}
+                        className={`w-12 h-12 flex items-center justify-center cursor-pointer rounded-full 
+                            ${isAiIcon
+                                ? 'bg-black text-white hover:bg-white hover:text-black border-2 border-white'
+                                : 'bg-white text-black hover:bg-black hover:text-white'
+                            } px-2 py-2`}
                         onClick={handleSortClick}
                     >
                         {sortBy === 'view' ? (
@@ -294,7 +303,11 @@ export default function SearchPage() {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.5 }}
-                        className="w-12 h-12 flex items-center justify-center cursor-pointer rounded-full hover:bg-black hover:text-white px-2 py-2"
+                        className={`w-12 h-12 flex items-center justify-center cursor-pointer rounded-full 
+                            ${isAiIcon
+                                ? 'bg-black text-white hover:bg-white hover:text-black border-2 border-white'
+                                : 'bg-white text-black hover:bg-black hover:text-white'
+                            } px-2 py-2`}
                         onClick={toggleLayout}
                     >
                         {isGridLayout ? (
@@ -311,7 +324,11 @@ export default function SearchPage() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.5 }}
-                        className="w-12 h-12 flex items-center justify-center cursor-pointer rounded-full hover:bg-black hover:text-white px-2 py-2"
+                        className={`w-12 h-12 flex items-center justify-center cursor-pointer rounded-full 
+                            ${isAiIcon
+                                ? 'bg-black text-white hover:bg-white hover:text-black border-2 border-white'
+                                : 'bg-white text-black hover:bg-black hover:text-white'
+                            } px-2 py-2`}
                         onClick={handleIconClick}
                     >
                         {isAiIcon ? (
@@ -351,7 +368,7 @@ export default function SearchPage() {
                                                     key={tool.id}
                                                     selectedTool={tool}
                                                     onBack={handleBack}
-                                                    theme="light"
+                                                    theme={isAiIcon ? 'dark' : 'light'}
                                                 />
                                             );
                                         }
@@ -370,7 +387,7 @@ export default function SearchPage() {
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.5, delay: index * 0.1 }}
-                                        className="bg-white rounded-xl overflow-hidden cursor-pointer transform-gpu"
+                                        className={`${isAiIcon ? 'bg-black' : 'bg-white'} rounded-xl overflow-hidden cursor-pointer transform-gpu`}
                                         style={{ display: 'flex', flexDirection: isGridLayout ? 'column' : 'row' }}
                                         onClick={() => handleToolClick(tool)}
                                     >
@@ -396,10 +413,10 @@ export default function SearchPage() {
                                                 fontSize: isGridLayout ? '1.1rem' : '1.5rem'
                                             }}>
                                             <div className="flex justify-between items-center px-2">
-                                                <h2 className={`font-medium text-black ${isGridLayout ? 'text-xl' : 'text-2xl'}`}>
+                                                <h2 className={`font-medium ${isAiIcon ? 'text-white' : 'text-black'} ${isGridLayout ? 'text-xl' : 'text-2xl'}`}>
                                                     {tool.name}
                                                 </h2>
-                                                <div className="flex items-center gap-2"
+                                                <div className={`flex items-center gap-2 ${isAiIcon ? 'text-white' : 'text-black'}`}
                                                     style={{ fontSize: isGridLayout ? '1.2rem' : '2rem' }}>
                                                     {sortBy === 'view' ? (
                                                         <>
@@ -439,7 +456,7 @@ export default function SearchPage() {
                                                 </div>
                                             </div>
                                             {!isGridLayout && (
-                                                <p className="text-black mt-2 transition-all duration-300 line-clamp-2 overflow-hidden"
+                                                <p className={`${isAiIcon ? 'text-white' : 'text-black'} mt-2 transition-all duration-300 line-clamp-2 overflow-hidden`}
                                                     style={{
                                                         fontSize: '1.25rem',
                                                         display: '-webkit-box',
@@ -458,10 +475,10 @@ export default function SearchPage() {
                             {/* No results */}
                             {!isLoading && tools.length === 0 && (
                                 <div className="text-center py-16">
-                                    <h2 className="text-2xl font-bold text-black mb-4">
+                                    <h2 className={`text-2xl font-bold ${isAiIcon ? 'text-white' : 'text-black'} mb-4`}>
                                         Không tìm thấy kết quả nào
                                     </h2>
-                                    <p className="">
+                                    <p className={isAiIcon ? 'text-white' : 'text-black'}>
                                         Vui lòng thử lại với từ khóa khác
                                     </p>
                                 </div>
