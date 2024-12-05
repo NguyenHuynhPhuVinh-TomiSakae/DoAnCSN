@@ -40,6 +40,7 @@ export default function NewAITools() {
     const [currentPage, setCurrentPage] = useState(1);
     const limit = 4;
     const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
+    const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
 
     const indexOfLastTool = currentPage * limit;
     const indexOfFirstTool = indexOfLastTool - limit;
@@ -59,10 +60,12 @@ export default function NewAITools() {
     }, []);
 
     const nextSlide = () => {
+        setSlideDirection('left');
         setCurrentPage(p => Math.min(totalPages, p + 1));
     };
 
     const prevSlide = () => {
+        setSlideDirection('right');
         setCurrentPage(p => Math.max(1, p - 1));
     };
 
@@ -160,7 +163,7 @@ export default function NewAITools() {
                                 className="absolute w-full lg:w-1/4 px-4 cursor-pointer"
                                 onClick={() => handleToolClick(tool)}
                                 initial={{
-                                    x: 0,
+                                    x: slideDirection === 'right' ? '300%' : '0',
                                     y: 0,
                                     zIndex: 10 - index
                                 }}
@@ -168,7 +171,7 @@ export default function NewAITools() {
                                     x: `${index * 100}%`,
                                     y: 0,
                                     transition: {
-                                        duration: 0.8,
+                                        duration: slideDirection === 'right' ? 0.8 : 0.4,
                                         delay: index * 0.2,
                                         ease: "easeOut"
                                     }
