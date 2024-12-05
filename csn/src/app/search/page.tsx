@@ -39,7 +39,10 @@ export default function SearchPage() {
     const router = useRouter();
     const [isGridLayout, setIsGridLayout] = useState(true);
     const [sortBy, setSortBy] = useState<'view' | 'heart' | 'evaluation'>('view');
-    const [isAiIcon, setIsAiIcon] = useState(false);
+    const [isAiIcon, setIsAiIcon] = useState(() => {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('ai') === 'true';
+    });
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -54,13 +57,35 @@ export default function SearchPage() {
             }
 
             try {
-                const response = await fetch(`/api/showai?q=${encodeURIComponent(query)}`);
+                const response = await fetch(isAiIcon ? '/api/showai' : `/api/showai?q=${encodeURIComponent(query)}`);
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
                 const data = await response.json();
-                const sortedTools = data.data.sort((a: Tool, b: Tool) => b[sortBy] - a[sortBy]);
-                setTools(sortedTools);
+
+                if (isAiIcon) {
+                    const aiResponse = await fetch('/api/aiSearch', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            tools: data.data,
+                            query: query
+                        }),
+                    });
+
+                    if (!aiResponse.ok) {
+                        throw new Error('AI search failed');
+                    }
+
+                    const aiData = await aiResponse.json();
+                    const sortedTools = aiData.data.sort((a: Tool, b: Tool) => b[sortBy] - a[sortBy]);
+                    setTools(sortedTools);
+                } else {
+                    const sortedTools = data.data.sort((a: Tool, b: Tool) => b[sortBy] - a[sortBy]);
+                    setTools(sortedTools);
+                }
             } catch (error) {
                 console.error('Lỗi khi tìm kiếm:', error);
                 setTools([]);
@@ -70,7 +95,7 @@ export default function SearchPage() {
         };
 
         fetchSearchResults();
-    }, [query, sortBy]);
+    }, [query, sortBy, isAiIcon]);
 
     useEffect(() => {
         const searchInput = document.querySelector('input[type="text"]') as HTMLInputElement;
@@ -81,7 +106,11 @@ export default function SearchPage() {
 
     const handleSearch = () => {
         if (!searchValue.trim()) return;
-        router.push(`/search?q=${encodeURIComponent(searchValue.trim())}`);
+
+        // Giữ lại trạng thái AI mode trong URL khi tìm kiếm
+        const searchQuery = encodeURIComponent(searchValue.trim());
+        const aiParam = isAiIcon ? '&ai=true' : '';
+        router.push(`/search?q=${searchQuery}${aiParam}`);
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -345,7 +374,7 @@ export default function SearchPage() {
             <div className="max-w-7xl mx-auto px-4 py-8 mt-8">
                 {isLoading ? (
                     <motion.div
-                        className="w-12 h-12 bg-black mx-auto mt-32"
+                        className={`w-12 h-12 ${isAiIcon ? 'bg-white' : 'bg-black'} mx-auto mt-32`}
                         animate={{
                             rotate: 360,
                             scale: [1, 0.8, 1],
