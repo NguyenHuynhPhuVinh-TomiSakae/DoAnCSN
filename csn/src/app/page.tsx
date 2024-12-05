@@ -353,9 +353,9 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
             <div className={`showai-text text-9xl font-bold mb-4 opacity-0 invisible ${orbitron.className} tracking-wider`}>
               SHOWAI
             </div>
-            <div className="showai-description text-xl mb-8 opacity-0 invisible">
+            <div className="showai-description text-2xl mb-8 opacity-0 invisible">
               Khám phá các công cụ <span className={`${beVietnamPro.className} font-bold text-2xl`}>AI</span> miễn phí
-              <div className="text-xl mt-1">sử dụng được tại <span className={`${beVietnamPro.className} font-bold text-2xl`}>Việt Nam</span></div>
+              <div className="text-2xl mt-1">sử dụng được tại <span className={`${beVietnamPro.className} font-bold text-2xl`}>Việt Nam</span></div>
             </div>
           </div>
 
