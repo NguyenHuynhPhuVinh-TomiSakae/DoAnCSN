@@ -257,6 +257,19 @@ const Navbar = () => {
 
     const handleSearch = () => {
         if (searchValue.trim()) {
+            // Reset các state
+            setIsIntroView(false);
+            setIsDark(false);
+            setIsNavHovered(false);
+            setHoveredTitle(null);
+            setShouldAnimate(false);
+            setHoverText(false);
+            setHasScrolled(false);
+
+            // Cuộn lên đầu trang
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Chuyển hướng đến trang tìm kiếm
             router.push(`/search?q=${encodeURIComponent(searchValue.trim())}`);
         }
     };
