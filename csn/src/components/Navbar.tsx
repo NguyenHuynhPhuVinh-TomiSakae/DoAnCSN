@@ -299,27 +299,25 @@ const Navbar = () => {
     return (
         <motion.nav
             className={`fixed top-0 left-0 right-0 h-16 z-50 flex justify-between items-center px-8 transition-colors duration-300 
-                ${isAiIcon
+                ${isAiIcon || isChatPage
                     ? 'bg-black text-white'
-                    : isChatPage
-                        ? 'bg-black text-white'
-                        : isInNewAITools
-                            ? 'bg-black'
-                            : isDark || isInShowAIIntro
-                                ? isInAIRanking
-                                    ? 'bg-white'
-                                    : 'bg-black'
-                                : 'bg-white'
+                    : isInNewAITools
+                        ? 'bg-black'
+                        : isDark || isInShowAIIntro
+                            ? isInAIRanking
+                                ? 'bg-white'
+                                : 'bg-black'
+                            : 'bg-white'
                 }`}
             initial={{ opacity: 0, y: -20 }}
             animate={{
-                opacity: isSearchPage ? (isInitialLoad ? 0 : 1) : (isLoading ? 0 : 1),
-                y: isSearchPage ? (isInitialLoad ? -20 : 0) : (isLoading ? -20 : 0)
+                opacity: isSearchPage || isChatPage ? (isInitialLoad ? 0 : 1) : (isLoading ? 0 : 1),
+                y: isSearchPage || isChatPage ? (isInitialLoad ? -20 : 0) : (isLoading ? -20 : 0)
             }}
             transition={{
                 duration: 0.8,
                 ease: "easeOut",
-                delay: isSearchPage ? (isInitialLoad ? 0 : 0.2) : (isLoading ? 0 : 0.2)
+                delay: isSearchPage || isChatPage ? (isInitialLoad ? 0 : 0.2) : (isLoading ? 0 : 0.2)
             }}
             onMouseEnter={() => hasScrolled && setIsNavHovered(true)}
             onMouseLeave={() => {
