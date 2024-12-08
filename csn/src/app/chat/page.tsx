@@ -1,11 +1,20 @@
 'use client';
-import { useState, KeyboardEvent, useEffect } from 'react';
+import { useState, KeyboardEvent, useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { useSearchParams } from 'next/navigation';
 
 export default function ChatPage() {
+    const borderTopRef = useRef(null);
+    const borderRightRef = useRef(null);
+    const borderBottomRef = useRef(null);
+    const borderLeftRef = useRef(null);
     const [messages, setMessages] = useState<Array<{ type: 'user' | 'ai', content: string }>>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [tools, setTools] = useState([]);
+    const contentRef = useRef(null);
+    const searchParams = useSearchParams();
+    const [isAnimationComplete, setIsAnimationComplete] = useState(false);
 
     // Fetch tools khi component mount
     useEffect(() => {
@@ -20,6 +29,93 @@ export default function ChatPage() {
         };
         fetchTools();
     }, []);
+
+    useEffect(() => {
+        const tl = gsap.timeline();
+
+        // Ẩn nội dung ban đầu
+        gsap.set(contentRef.current, {
+            opacity: 0
+        });
+
+        // Reset borders với vị trí bắt đầu từ giữa
+        gsap.set([borderTopRef.current, borderBottomRef.current], {
+            width: 0,
+            height: '2px',
+            left: '50%',
+            xPercent: -50
+        });
+
+        gsap.set([borderLeftRef.current, borderRightRef.current], {
+            width: '2px',
+            height: 0,
+            top: '50%',
+            yPercent: -50
+        });
+
+        // Vẽ tất cả các cạnh cùng lúc
+        tl.to([
+            borderTopRef.current,
+            borderBottomRef.current
+        ], {
+            width: '100%',
+            duration: 0.5,
+            ease: 'none'
+        })
+            .to([
+                borderLeftRef.current,
+                borderRightRef.current
+            ], {
+                height: '100%',
+                duration: 0.5,
+                ease: 'none'
+            }, "<")
+            .to(contentRef.current, {
+                opacity: 1,
+                duration: 0.3,
+                onComplete: () => {
+                    const input = document.querySelector('input');
+                    if (input) input.focus();
+                    setIsAnimationComplete(true);
+                }
+            });
+    }, []);
+
+    useEffect(() => {
+        const initialQuestion = searchParams.get('q');
+
+        if (initialQuestion && tools.length > 0 && isAnimationComplete) {
+            const askInitialQuestion = async () => {
+                setIsLoading(true);
+                setMessages(prev => [...prev, { type: 'user', content: initialQuestion }]);
+
+                try {
+                    const response = await fetch('/api/aiChat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: initialQuestion,
+                            tools: tools
+                        })
+                    });
+
+                    const data = await response.json();
+                    setMessages(prev => [...prev, { type: 'ai', content: data.reply }]);
+                } catch (error) {
+                    console.error('Chat error:', error);
+                    setMessages(prev => [...prev, {
+                        type: 'ai',
+                        content: 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.'
+                    }]);
+                }
+
+                setIsLoading(false);
+            };
+
+            askInitialQuestion();
+            window.history.replaceState({}, '', '/chat');
+        }
+    }, [tools, searchParams, isAnimationComplete]);
 
     const handleKeyPress = async (e: KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter' && input.trim()) {
@@ -53,8 +149,17 @@ export default function ChatPage() {
 
     return (
         <div className="min-h-screen pt-16 bg-black text-white flex items-center justify-center p-4">
-            <div className="w-full h-[calc(100vh-5rem)] max-w-7xl border-2 border-white rounded-lg pt-1 px-2 text-xl">
-                <div className="font-mono bg-black text-white h-full overflow-y-auto">
+            <div className="relative w-full h-[calc(100vh-5rem)] max-w-7xl">
+                {/* Border container */}
+                <div className="absolute inset-0">
+                    <div ref={borderTopRef} className="absolute top-0 left-1/2 h-[2px] bg-white" />
+                    <div ref={borderRightRef} className="absolute right-0 top-1/2 w-[2px] bg-white" />
+                    <div ref={borderBottomRef} className="absolute bottom-0 left-1/2 h-[2px] bg-white" />
+                    <div ref={borderLeftRef} className="absolute left-0 top-1/2 w-[2px] bg-white" />
+                </div>
+
+                {/* Content container */}
+                <div ref={contentRef} className="font-mono bg-black text-white h-full text-xl overflow-y-auto p-4">
                     {messages.map((msg, index) => (
                         <div key={index} className="flex flex-col mb-2">
                             <div className="flex items-start">

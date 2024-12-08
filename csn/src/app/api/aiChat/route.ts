@@ -23,7 +23,7 @@ let history: ChatHistory = [];
 export async function POST(request: Request) {
     try {
         const { message, tools } = await request.json();
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-002" });
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-8b" });
 
         // Khởi tạo chat session nếu chưa có
         if (!chatSession) {

@@ -22,7 +22,7 @@ const Navbar = () => {
     const line3Ref = useRef(null);
     const text1Ref = useRef(null);
     const text2Ref = useRef(null);
-    const inputRef = useRef(null);
+    const inputRef = useRef<HTMLInputElement>(null);
     const [isDark, setIsDark] = useState(false);
     const [isIntroView, setIsIntroView] = useState(false);
     const [shouldAnimate, setShouldAnimate] = useState(true);
@@ -43,6 +43,7 @@ const Navbar = () => {
     const [isAiIcon, setIsAiIcon] = useState(false);
     const isChatPage = pathname === '/chat';
     const shouldShowLines = !isSearchPage && !isChatPage;
+    const [aiInputValue, setAiInputValue] = useState('');
 
     useEffect(() => {
         const aiParam = searchParams.get('ai');
@@ -258,7 +259,8 @@ const Navbar = () => {
     }, [pathname]);
 
     const handleSearch = () => {
-        if (searchValue.trim()) {
+        const trimmedValue = searchValue?.trim();
+        if (trimmedValue) {
             // Reset các state
             setIsIntroView(false);
             setIsDark(false);
@@ -272,7 +274,7 @@ const Navbar = () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
             // Chuyển hướng đến trang tìm kiếm
-            router.push(`/search?q=${encodeURIComponent(searchValue.trim())}`);
+            router.push(`/search?q=${encodeURIComponent(trimmedValue)}`);
         }
     };
 
@@ -294,6 +296,13 @@ const Navbar = () => {
     // Thêm hàm xử lý click vào icon AI
     const handleAIIconClick = () => {
         router.push('/chat');
+    };
+
+    // Thêm hàm xử lý khi nhấn Enter trong input AI
+    const handleAIInputKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' && aiInputValue.trim()) {
+            router.push(`/chat?q=${encodeURIComponent(aiInputValue.trim())}`);
+        }
     };
 
     return (
@@ -602,7 +611,10 @@ const Navbar = () => {
                                         <div ref={inputRef} className="absolute left-0 -translate-x-20">
                                             <input
                                                 type="text"
+                                                value={aiInputValue}
+                                                onChange={(e) => setAiInputValue(e.target.value)}
                                                 placeholder="Nhập câu hỏi của bạn..."
+                                                onKeyPress={handleAIInputKeyPress}
                                                 className={`border-2 transition-colors duration-300 ${isDark || isInShowAIIntro
                                                     ? isInAIRanking
                                                         ? 'border-black text-black bg-white placeholder-text-black'
