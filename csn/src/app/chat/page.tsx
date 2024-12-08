@@ -15,6 +15,7 @@ export default function ChatPage() {
     const contentRef = useRef(null);
     const searchParams = useSearchParams();
     const [isAnimationComplete, setIsAnimationComplete] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     // Fetch tools khi component mount
     useEffect(() => {
@@ -147,9 +148,21 @@ export default function ChatPage() {
         }
     };
 
+    useEffect(() => {
+        const handleClick = (e: MouseEvent) => {
+            if (containerRef.current?.contains(e.target as Node)) {
+                const input = document.querySelector('input');
+                if (input) input.focus();
+            }
+        };
+
+        document.addEventListener('click', handleClick);
+        return () => document.removeEventListener('click', handleClick);
+    }, []);
+
     return (
         <div className="min-h-screen pt-16 bg-black text-white flex items-center justify-center p-4">
-            <div className="relative w-full h-[calc(100vh-5rem)] max-w-7xl">
+            <div ref={containerRef} className="relative w-full h-[calc(100vh-5rem)] max-w-7xl">
                 {/* Border container */}
                 <div className="absolute inset-0">
                     <div ref={borderTopRef} className="absolute top-0 left-1/2 h-[2px] bg-white" />
