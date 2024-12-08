@@ -300,7 +300,7 @@ const Navbar = () => {
         <motion.nav
             className={`fixed top-0 left-0 right-0 h-16 z-50 flex justify-between items-center px-8 transition-colors duration-300 
                 ${isAiIcon
-                    ? 'bg-white text-black'
+                    ? 'bg-black text-white'
                     : isChatPage
                         ? 'bg-black text-white'
                         : isInNewAITools
@@ -329,7 +329,7 @@ const Navbar = () => {
         >
             <div className={`${beVietnamPro.className} text-xl transition-colors duration-300 
                 ${isAiIcon
-                    ? 'text-black'
+                    ? 'text-white'
                     : isChatPage
                         ? 'text-white'
                         : isInNewAITools
@@ -440,21 +440,25 @@ const Navbar = () => {
                             exit={{ opacity: 0, x: 0 }}
                             transition={{ duration: 0.3, ease: "easeInOut" }}
                             key="menu-collapsed"
-                            className={`cursor-pointer group relative px-3 py-1 ${(isSearchPage || isChatPage) ? 'hover:bg-black hover:text-white' : ''}`}
+                            className={`cursor-pointer group relative px-3 py-1 ${isSearchPage || isChatPage ? (isAiIcon || isChatPage ? 'hover:bg-white hover:text-black' : 'hover:bg-black hover:text-white') : ''}`}
                             onClick={() => {
                                 if (isSearchPage || isChatPage) {
                                     router.push('/');
                                 }
                             }}
                         >
-                            {(isSearchPage || isChatPage) ? (
+                            {isSearchPage || isChatPage ? (
                                 <div
-                                    className={`relative px-3 py-1 ${isChatPage ? 'hover:bg-white hover:text-black' : 'hover:bg-black hover:text-white'}`}
+                                    className={`relative px-3 py-1 
+                                        ${isAiIcon || isChatPage
+                                            ? 'hover:bg-white hover:text-black'
+                                            : 'hover:bg-black hover:text-white'
+                                        }`}
                                     onMouseEnter={() => setHoverText(true)}
                                     onMouseLeave={() => setHoverText(false)}
                                 >
                                     <span>
-                                        {hoverText ? 'QUAY LẠI' : (isChatPage ? 'TRÒ CHUYỆN' : 'TÌM KIẾM')}
+                                        {hoverText ? 'QUAY LẠI' : (isSearchPage ? 'TÌM KIẾM' : 'TRÒ CHUYỆN')}
                                     </span>
                                 </div>
                             ) : (
@@ -531,7 +535,7 @@ const Navbar = () => {
                 <FaRobot
                     className={`w-8 h-8 transition-colors duration-300 cursor-pointer
                         ${isAiIcon
-                            ? 'text-black'
+                            ? 'text-white'
                             : isChatPage
                                 ? 'text-white'
                                 : isInNewAITools
