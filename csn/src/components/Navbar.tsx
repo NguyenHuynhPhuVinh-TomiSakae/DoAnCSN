@@ -41,6 +41,8 @@ const Navbar = () => {
     const [isInitialLoad, setIsInitialLoad] = useState(true);
     const searchParams = useSearchParams();
     const [isAiIcon, setIsAiIcon] = useState(false);
+    const isChatPage = pathname === '/chat';
+    const shouldShowLines = !isSearchPage && !isChatPage;
 
     useEffect(() => {
         const aiParam = searchParams.get('ai');
@@ -118,7 +120,7 @@ const Navbar = () => {
     gsap.registerPlugin(TextPlugin);
 
     useEffect(() => {
-        if (!isLoading) {
+        if (!isLoading && shouldShowLines) {
             gsap.fromTo(lineRef.current,
                 { height: 0 },
                 {
@@ -128,10 +130,10 @@ const Navbar = () => {
                 }
             );
         }
-    }, [isLoading, isDark, isIntroView]);
+    }, [isLoading, isDark, isIntroView, shouldShowLines]);
 
     useEffect(() => {
-        if (!isLoading && shouldAnimate) {
+        if (!isLoading && shouldAnimate && shouldShowLines) {
             const elements = [line1Ref.current, line2Ref.current, line3Ref.current];
             if (elements.some(el => !el)) return;
 
@@ -177,7 +179,7 @@ const Navbar = () => {
 
             setShouldAnimate(false);
         }
-    }, [isLoading, shouldAnimate, isIntroView]);
+    }, [isLoading, shouldAnimate, isIntroView, shouldShowLines]);
 
     const scrollToSection = (sectionId: string) => {
         const element = document.querySelector(sectionId);
@@ -289,18 +291,25 @@ const Navbar = () => {
         return () => clearTimeout(timer);
     }, []);
 
+    // Thêm hàm xử lý click vào icon AI
+    const handleAIIconClick = () => {
+        router.push('/chat');
+    };
+
     return (
         <motion.nav
             className={`fixed top-0 left-0 right-0 h-16 z-50 flex justify-between items-center px-8 transition-colors duration-300 
                 ${isAiIcon
-                    ? 'bg-black text-white'
-                    : isInNewAITools
-                        ? 'bg-black'
-                        : isDark || isInShowAIIntro
-                            ? isInAIRanking
-                                ? 'bg-white'
-                                : 'bg-black'
-                            : 'bg-white'
+                    ? 'bg-white text-black'
+                    : isChatPage
+                        ? 'bg-black text-white'
+                        : isInNewAITools
+                            ? 'bg-black'
+                            : isDark || isInShowAIIntro
+                                ? isInAIRanking
+                                    ? 'bg-white'
+                                    : 'bg-black'
+                                : 'bg-white'
                 }`}
             initial={{ opacity: 0, y: -20 }}
             animate={{
@@ -320,15 +329,17 @@ const Navbar = () => {
         >
             <div className={`${beVietnamPro.className} text-xl transition-colors duration-300 
                 ${isAiIcon
-                    ? 'text-white'
-                    : isInNewAITools
+                    ? 'text-black'
+                    : isChatPage
                         ? 'text-white'
-                        : isDark || isInShowAIIntro
-                            ? isInAIRanking
-                                ? 'text-black'
-                                : 'text-white'
-                            : 'text-black'
-                } ${(hoveredTitle === 'hover' && isNavHovered && !isSearchPage && hasScrolled) ? '' : 'font-bold'}`}
+                        : isInNewAITools
+                            ? 'text-white'
+                            : isDark || isInShowAIIntro
+                                ? isInAIRanking
+                                    ? 'text-black'
+                                    : 'text-white'
+                                : 'text-black'
+                }`}
                 onMouseEnter={() => hasScrolled && setHoveredTitle('hover')}
             >
                 <AnimatePresence mode="wait">
@@ -429,29 +440,22 @@ const Navbar = () => {
                             exit={{ opacity: 0, x: 0 }}
                             transition={{ duration: 0.3, ease: "easeInOut" }}
                             key="menu-collapsed"
-                            className={`cursor-pointer group relative px-3 py-1 ${isSearchPage ? 'hover:bg-black hover:text-white' : ''}`}
+                            className={`cursor-pointer group relative px-3 py-1 ${(isSearchPage || isChatPage) ? 'hover:bg-black hover:text-white' : ''}`}
                             onClick={() => {
-                                if (isSearchPage) {
+                                if (isSearchPage || isChatPage) {
                                     router.push('/');
                                 }
                             }}
                         >
-                            {isSearchPage ? (
+                            {(isSearchPage || isChatPage) ? (
                                 <div
-                                    className={`cursor-pointer relative px-3 py-1 
-                                        ${isAiIcon
-                                            ? 'hover:bg-white hover:text-black'  // Khi isAiIcon true
-                                            : 'hover:bg-black hover:text-white'  // Khi isAiIcon false
-                                        }`}
-                                    onClick={() => router.push('/')}
+                                    className={`relative px-3 py-1 ${isChatPage ? 'hover:bg-white hover:text-black' : 'hover:bg-black hover:text-white'}`}
                                     onMouseEnter={() => setHoverText(true)}
                                     onMouseLeave={() => setHoverText(false)}
                                 >
-                                    <div className="relative">
-                                        <span>
-                                            {hoverText ? 'QUAY LẠI' : 'TÌM KIẾM'}
-                                        </span>
-                                    </div>
+                                    <span>
+                                        {hoverText ? 'QUAY LẠI' : (isChatPage ? 'TRÒ CHUYỆN' : 'TÌM KIẾM')}
+                                    </span>
                                 </div>
                             ) : (
                                 isInNewAITools
@@ -524,18 +528,23 @@ const Navbar = () => {
             )}
 
             <div className="flex items-center relative">
-                <FaRobot className={`w-8 h-8 transition-colors duration-300 
-                    ${isAiIcon
-                        ? 'text-white'
-                        : isInNewAITools
-                            ? 'text-white'
-                            : isDark || isInShowAIIntro
-                                ? isInAIRanking
-                                    ? 'text-black'
-                                    : 'text-white'
-                                : 'text-black'
-                    }`} />
-                {!isSearchPage && (
+                <FaRobot
+                    className={`w-8 h-8 transition-colors duration-300 cursor-pointer
+                        ${isAiIcon
+                            ? 'text-black'
+                            : isChatPage
+                                ? 'text-white'
+                                : isInNewAITools
+                                    ? 'text-white'
+                                    : isDark || isInShowAIIntro
+                                        ? isInAIRanking
+                                            ? 'text-black'
+                                            : 'text-white'
+                                        : 'text-black'
+                        }`}
+                    onClick={handleAIIconClick}
+                />
+                {shouldShowLines && (
                     <div ref={lineRef} className={`absolute top-full left-1/2 transform -translate-x-1/2 w-0.5 transition-colors duration-300 ${isDark || isInShowAIIntro
                         ? isInAIRanking
                             ? 'bg-black'
