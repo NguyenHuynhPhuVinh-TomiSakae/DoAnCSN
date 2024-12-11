@@ -3,7 +3,7 @@ import { FaRobot } from "react-icons/fa";
 import { Be_Vietnam_Pro } from 'next/font/google';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLoading } from '@/context/LoadingContext';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, Suspense } from 'react';
 import gsap from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -14,7 +14,7 @@ const beVietnamPro = Be_Vietnam_Pro({
     display: 'swap',
 });
 
-const Navbar = () => {
+const NavbarContent = () => {
     const { isLoading } = useLoading();
     const lineRef = useRef(null);
     const line1Ref = useRef(null);
@@ -631,6 +631,14 @@ const Navbar = () => {
                 )}
             </div>
         </motion.nav>
+    );
+};
+
+const Navbar = () => {
+    return (
+        <Suspense fallback={null}>
+            <NavbarContent />
+        </Suspense>
     );
 };
 

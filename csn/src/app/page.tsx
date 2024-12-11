@@ -43,7 +43,7 @@ const searchTerms = [
 gsap.registerPlugin(ScrollTrigger);
 
 // Tạo component với SSR disabled
-const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps) => {
+const LoadingComponent = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps) => {
   const { setIsLoading } = useLoading();
   const [currentProgress, setCurrentProgress] = useState(0);
   const progressRef = useRef(0);
@@ -482,7 +482,11 @@ const Loading = dynamic(() => Promise.resolve(({ onLoadComplete }: LoadingProps)
   );
 }), { ssr: false });
 
-// Wrapper component
-export default function LoadingWrapper(props: LoadingProps) {
-  return <Loading {...props} />;
+// Sửa lại export default để phù hợp với Next.js Page requirements
+export default function Page() {
+  const handleLoadComplete = () => {
+    // Xử lý khi loading hoàn tất
+  };
+
+  return <LoadingComponent onLoadComplete={handleLoadComplete} />;
 }

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -30,6 +30,14 @@ interface Tool {
 }
 
 export default function SearchPage() {
+    return (
+        <Suspense fallback={<div>Đang tải...</div>}>
+            <SearchPageContent />
+        </Suspense>
+    );
+}
+
+function SearchPageContent() {
     const searchParams = useSearchParams();
     const query = searchParams.get('q');
     const [tools, setTools] = useState<Tool[]>([]);

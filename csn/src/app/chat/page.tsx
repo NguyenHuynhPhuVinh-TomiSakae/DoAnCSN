@@ -1,9 +1,10 @@
 'use client';
-import { useState, KeyboardEvent, useEffect, useRef } from 'react';
+import { useState, KeyboardEvent, useEffect, useRef, Suspense } from 'react';
 import gsap from 'gsap';
 import { useSearchParams } from 'next/navigation';
 
-export default function ChatPage() {
+// Tạo component riêng để xử lý searchParams
+function ChatContent() {
     const borderTopRef = useRef(null);
     const borderRightRef = useRef(null);
     const borderBottomRef = useRef(null);
@@ -205,5 +206,14 @@ export default function ChatPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+// Component chính
+export default function ChatPage() {
+    return (
+        <Suspense fallback={<div>Đang tải...</div>}>
+            <ChatContent />
+        </Suspense>
     );
 }
