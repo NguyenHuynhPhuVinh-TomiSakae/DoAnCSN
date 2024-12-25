@@ -14,7 +14,7 @@ export async function POST(request: Request) {
             keyFeatures: tool.keyFeatures
         }));
 
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-002" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
 
         const prompt = `
         Bạn là một AI assistant giúp tìm kiếm công cụ AI phù hợp nhất. 
