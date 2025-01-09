@@ -103,7 +103,7 @@ function SearchPageContent() {
         };
 
         fetchSearchResults();
-    }, [query, sortBy, isAiIcon]);
+    }, [query, isAiIcon]);
 
     useEffect(() => {
         const searchInput = document.querySelector('input[type="text"]') as HTMLInputElement;
@@ -454,11 +454,11 @@ function SearchPageContent() {
                                                     {tool.name}
                                                 </h2>
                                                 <div className={`flex items-center gap-2 ${isAiIcon ? 'text-white' : 'text-black'}`}
-                                                    style={{ fontSize: isGridLayout ? '1.2rem' : '2rem' }}>
+                                                    style={{ fontSize: isGridLayout ? '1.2rem' : '1.7rem' }}>
                                                     {sortBy === 'view' ? (
                                                         <>
                                                             <svg xmlns="http://www.w3.org/2000/svg"
-                                                                className={`${isGridLayout ? 'h-5 w-5' : 'h-8 w-8'}`}
+                                                                className={`${isGridLayout ? 'h-5 w-5' : 'h-7 w-7'}`}
                                                                 fill="none"
                                                                 viewBox="0 0 24 24"
                                                                 stroke="currentColor">
@@ -470,7 +470,7 @@ function SearchPageContent() {
                                                     ) : sortBy === 'heart' ? (
                                                         <>
                                                             <svg xmlns="http://www.w3.org/2000/svg"
-                                                                className={`${isGridLayout ? 'h-5 w-5' : 'h-8 w-8'}`}
+                                                                className={`${isGridLayout ? 'h-5 w-5' : 'h-7 w-7'}`}
                                                                 fill="none"
                                                                 viewBox="0 0 24 24"
                                                                 stroke="currentColor">
@@ -481,7 +481,7 @@ function SearchPageContent() {
                                                     ) : (
                                                         <>
                                                             <svg xmlns="http://www.w3.org/2000/svg"
-                                                                className={`${isGridLayout ? 'h-5 w-5' : 'h-8 w-8'}`}
+                                                                className={`${isGridLayout ? 'h-5 w-5' : 'h-7 w-7'}`}
                                                                 fill="none"
                                                                 viewBox="0 0 24 24"
                                                                 stroke="currentColor">

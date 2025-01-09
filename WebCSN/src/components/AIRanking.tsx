@@ -271,7 +271,7 @@ export default function AIRanking() {
                                                 <motion.div
                                                     key={tool.id}
                                                     data-tool-id={tool.id}
-                                                    className="flex items-center gap-4 h-[120px] border-b-2 border-black -mx-8 px-8 group relative hover:bg-black transition-all duration-300"
+                                                    className="flex items-center gap-4 h-[120px] border-b-2 border-black -mx-8 px-8 group relative hover:bg-black"
                                                     variants={itemVariants}
                                                     initial="hidden"
                                                     whileInView="visible"
@@ -287,13 +287,13 @@ export default function AIRanking() {
                                                                 className="object-cover rounded-lg"
                                                             />
                                                         </div>
-                                                        <div className="font-bold group-hover:text-white transition-colors duration-300">
+                                                        <div className="font-bold group-hover:text-white">
                                                             {tool.name}
                                                         </div>
-                                                        <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-4">
+                                                        <div className="ml-auto opacity-0 group-hover:opacity-100 flex gap-4">
                                                             <button
-                                                                className="px-4 py-2 border border-white text-white rounded hover:bg-white hover:text-black transition-colors"
                                                                 onClick={() => handleToolClick(tool)}
+                                                                className="px-4 py-2 border border-white text-white hover:bg-white hover:text-black"
                                                             >
                                                                 Chi tiết
                                                             </button>
